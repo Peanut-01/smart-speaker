@@ -59,7 +59,7 @@ void socket_send_data(struct json_object *obj)
     memcpy(buf, &len, 4);
     memcpy(buf + 4, data, len);
 
-    printf("发送 %d 字节\n", len);
+    //printf("发送 %d 字节\n", len);
 
     if (send(g_sockfd, buf, len + 4, 0) == -1) 
     {

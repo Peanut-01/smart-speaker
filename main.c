@@ -53,10 +53,8 @@ int main()
 
     //link_traverse_list();
     
-    while (1)
-    {
-        /* code */
-    }
+    // 循环监听
+    m_select();
 
     return 0;
 }
