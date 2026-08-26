@@ -124,9 +124,19 @@ void child_process(char *name)
         }
         else if (0 == pid)  // 孙进程
         {
-            // 修改共享内存
+            // 读取共享内存
             Shm s;
             parent_get_shm(&s);
+
+            if (strlen(name) == 0)  // 不是第一次进来
+            {
+                if (link_find_next(s.cur_mode, s.cur_music, name) == -1)
+                {
+                    printf("歌曲播放完毕......\n");
+                    sleep(5);
+                }
+            }
+            // 修改共享内存
 
             s.child_pid = getppid();
             s.grand_pid = getpid();
@@ -161,8 +171,10 @@ void child_process(char *name)
                 fprintf(stderr, "[ERROR] MPLAYER启动失败");
             }
         } 
-        else                //子进程
+        else                // 子进程
         {   
+            // 清空子进程的name数组
+            memset(name, 0, strlen(name));
             int status;
             wait(&status);
         }

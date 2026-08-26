@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <json/json.h>
 #include <string.h>
+#include "player.h"
 
 
 Node *g_music_head = NULL;
@@ -93,4 +94,34 @@ void link_traverse_list()
         p = p->next;
     }
     printf("\n");
+}
+
+
+// 根据传入的参数找到下一首歌，如果找不到下一首返回-1，找到返回0
+int link_find_next(int mode, char *cur, char *next)
+{
+    if (NULL == cur || NULL == next)
+        return -1;
+    if (mode == CIRCLE)
+    {
+        strcpy(next, cur);
+        return 0;
+    }
+
+    Node *p = g_music_head->next;
+
+    // 寻找当前的歌
+    while (p)
+    {
+        if (strstr(p->music_name, cur))
+            break;
+        
+        p = p->next;    
+    }
+
+    if (p->next == NULL)    // 已经是最后一首歌
+        return -1;
+    
+    strcpy(next, p->next->music_name);
+    return 0;
 }

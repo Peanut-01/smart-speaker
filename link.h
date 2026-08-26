@@ -12,5 +12,6 @@ int init_link();
 int link_create_list(const char *s);
 int link_insert_elem(const char *name);
 void link_traverse_list();
+int link_find_next(int mode, char *cur, char *next);
 
 #endif // _LINK_H
