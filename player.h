@@ -10,6 +10,11 @@
 #define SEQUENCE 1
 #define CIRCLE 2
 
+#define ONLINE_MODE 1
+#define OFFLINE_MODE 2
+
+#define ONLINE_URL "http://180.76.142.171/music/"
+
 typedef struct Shm
 {
     char cur_music[128];
@@ -19,5 +24,9 @@ typedef struct Shm
 } Shm;
 
 int init_shm();
+void player_start_play();
+void player_play_music(char *name) ;
+void child_process(char *name);
+void parent_get_shm(Shm *s);
 
 #endif // _PLAYER_H

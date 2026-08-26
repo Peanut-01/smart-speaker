@@ -3,10 +3,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+#include "player.h"
+#include <pthread.h>
 
 
 fd_set READSET;
 extern int g_maxfd;
+extern int g_sockfd;
+extern pthread_t tid;
 
 
 int init_select() 
@@ -39,6 +43,7 @@ void select_read_stdio()
     switch (ch)
     {
     case '1':
+        player_start_play();
         break;
     }
 }
@@ -64,6 +69,15 @@ void m_select()
         {
             select_read_stdio();
         }
+        else if (FD_ISSET(g_sockfd, &TMPSET))   // 网络可读
+        {
+            // 临时处理代码
+            FD_CLR(g_sockfd, &READSET);
+            g_maxfd = (g_maxfd == g_sockfd) ? (g_maxfd - 1) : g_maxfd;
+            close(g_sockfd);
+            pthread_cancel(tid);
+        }
+        
     }
     
 }

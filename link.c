@@ -60,6 +60,7 @@ int link_create_list(const char *s)
 }
 
 
+// 插入元素
 int link_insert_elem(const char *name)
 {
     Node *p = g_music_head;
@@ -81,6 +82,7 @@ int link_insert_elem(const char *name)
 }
 
 
+// 遍历链表并打印
 void link_traverse_list()
 {
     Node *p = g_music_head->next;

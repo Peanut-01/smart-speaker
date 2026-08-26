@@ -22,23 +22,9 @@ int g_maxfd = 0;
 pthread_t tid;
 
 extern fd_set READSET;
-extern int g_shmid;
 extern int g_start_flag;
 extern int g_suspend_flag;
-
-void parent_get_shm(Shm *s)
-{
-    // 映射共享内存
-    void *addr = shmat(g_shmid, NULL, 0);
-    if ((void *)-1 == addr)
-    {
-        perror("shmat");
-        return;
-    }
-    // 取出共享内存的信息
-    memcpy(s, addr, sizeof(Shm));
-    shmdt(addr);
-}
+extern int g_device_mode;
 
 
 // 封装json并发送到服务器
@@ -150,6 +136,9 @@ int init_socket()
             perror("pthread_create");
             return -1;
         }
+
+        // 切换为在线模式
+        g_device_mode = ONLINE_MODE;
 
         return 0;
     }
