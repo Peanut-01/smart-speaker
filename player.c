@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/wait.h>
+#include <signal.h>
 
 
 int g_shmid = 0;        // 共享内存id
@@ -19,7 +20,7 @@ extern Node *g_music_head;
 
 int init_shm()
 {
-    Shm s;
+    Shm s = {0};
     g_shmid = shmget(SHMKEY, SHMSIZE, IPC_EXCL | IPC_CREAT);
     if (-1 == g_shmid) 
     {
@@ -36,6 +37,7 @@ int init_shm()
 
     // 初始化共享内存中的数据
     s.cur_mode = SEQUENCE;
+    s.parent_pid = getpid();
 
     memcpy(addr, &s, sizeof(s));
     shmdt(addr);
@@ -101,6 +103,7 @@ void player_play_music(char *name)
     else if (0 == pid)
     {   
         // 子进程
+        signal(SIGUSR1, child_quit_process);
         child_process(name);
         exit(0);
     } 
@@ -108,6 +111,12 @@ void player_play_music(char *name)
     {
         return;
     }
+}
+
+
+void child_quit_process(int sig)
+{
+    g_start_flag = 0;   // 修改子进程的标志位
 }
 
 
@@ -130,10 +139,17 @@ void child_process(char *name)
 
             if (strlen(name) == 0)  // 不是第一次进来
             {
-                if (link_find_next(s.cur_mode, s.cur_music, name) == -1)
+                if (link_find_next(s.cur_mode, s.cur_music, name) == -1)    // 播放完了所有歌曲
                 {
-                    printf("歌曲播放完毕......\n");
-                    sleep(5);
+                    /*** 给父子进程发送信号，
+                     * 父进程收到信号：请求新的歌曲并更新
+                     * 子进程收到信号，修改标志位
+                     * */ 
+                    kill(s.parent_pid, SIGUSR1);
+                    kill(s.child_pid, SIGUSR1);
+
+                    usleep(100000);
+                    exit(0);
                 }
             }
             // 修改共享内存
@@ -146,6 +162,7 @@ void child_process(char *name)
                 while (*p != '/')
                     p++;
 
+                strncpy(s.cur_singer, name, p - name);
                 strcpy(s.cur_music, p + 1);
             }
 

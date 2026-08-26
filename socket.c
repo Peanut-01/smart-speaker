@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/wait.h>
 #include <string.h>
 #include "socket.h"
 #include <netinet/in.h>
@@ -25,6 +26,22 @@ extern fd_set READSET;
 extern int g_start_flag;
 extern int g_suspend_flag;
 extern int g_device_mode;
+
+
+void socket_update_music(int sig)
+{
+    // 修改父进程播放标志位
+    g_start_flag = 0;
+    // 回收子进程
+    Shm s;
+    parent_get_shm(&s);
+    int status;
+    waitpid(s.child_pid, &status, 0);
+    // 清空链表
+    link_clear_list();
+    // 请求新的数据并更新链表
+    socket_get_music(s.cur_singer);
+}
 
 
 // 封装json并发送到服务器

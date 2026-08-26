@@ -18,7 +18,9 @@
 typedef struct Shm
 {
     char cur_music[128];
+    char cur_singer[128];
     int cur_mode;
+    pid_t parent_pid;
     pid_t child_pid;
     pid_t grand_pid;
 } Shm;
@@ -28,5 +30,6 @@ void player_start_play();
 void player_play_music(char *name) ;
 void child_process(char *name);
 void parent_get_shm(Shm *s);
+void child_quit_process(int sig);
 
 #endif // _PLAYER_H

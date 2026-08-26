@@ -3,5 +3,6 @@
 
 int init_select();
 void m_select();
+void socket_update_music();
 
 #endif // _SELECT_H

@@ -125,3 +125,19 @@ int link_find_next(int mode, char *cur, char *next)
     strcpy(next, p->next->music_name);
     return 0;
 }
+
+
+// 清空链表
+void link_clear_list()
+{
+    Node *p = g_music_head->next;
+    while (p)
+    {
+        Node *q = p->next;
+        free(p);
+        p = q;
+    }
+
+    g_music_head->next = NULL;
+    
+}

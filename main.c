@@ -3,15 +3,20 @@
 #include "link.h"
 #include "player.h"
 #include <stdlib.h>
+#include <signal.h>
 #include "socket.h"
 #include "device.h"
 #include "main.h"
+#include "socket.h"
 
 
 int main()
 {
     // 运行初始化脚本
     system("/home/music_player/init.sh");
+
+    signal(SIGUSR1, socket_update_music);
+
     // 初始化集合   select
     if (init_select() != 0)
     {
