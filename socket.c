@@ -41,6 +41,8 @@ void socket_update_music(int sig)
     link_clear_list();
     // 请求新的数据并更新链表
     socket_get_music(s.cur_singer);
+
+    player_start_play();
 }
 
 
