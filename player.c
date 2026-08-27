@@ -252,7 +252,7 @@ void player_suspend_play()
     
     write_fifo("pause\n");
     g_suspend_flag = 1;
-    printf("-------暂停播放--------");
+    printf("-------暂停播放--------\n");
 }
 
 
@@ -264,6 +264,6 @@ void player_continue_play()
     
     write_fifo("pause\n");
     g_suspend_flag = 0;
-    printf("-------继续播放--------");
+    printf("-------继续播放--------\n");
 }
 

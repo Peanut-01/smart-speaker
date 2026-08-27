@@ -36,9 +36,11 @@ void show_menu()
 void select_read_stdio()
 {
     char ch;
-    scanf(" %c", &ch);
+    scanf("%c", &ch);
 
     printf("[SELECT] 读到键盘数据 [%c]\n", ch);
+
+    getchar();
 
     switch (ch)
     {
