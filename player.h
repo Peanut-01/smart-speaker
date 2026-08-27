@@ -31,5 +31,6 @@ void player_play_music(char *name) ;
 void child_process(char *name);
 void parent_get_shm(Shm *s);
 void child_quit_process(int sig);
+void player_stop_play();
 
 #endif // _PLAYER_H

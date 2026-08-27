@@ -9,6 +9,9 @@
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <signal.h>
+#include <fcntl.h>
+#include <fcntl.h>
 
 
 int g_shmid = 0;        // 共享内存id
@@ -197,3 +200,46 @@ void child_process(char *name)
         }
     }
 }
+
+
+int write_fifo(const char *cmd)
+{
+    int fd = open("/home/fifo/cmd_fifo", O_WRONLY);
+    if (-1 == fd)
+    {
+        perror("OPEN FIFO");
+        return -1;
+    }
+
+    if (write(fd, cmd, strlen(cmd)))
+    {
+        perror("WRITE FIFO");
+        close(fd);
+        return -1;
+    }
+
+    close(fd);
+    return 0;
+}
+
+
+// 结束播放
+void player_stop_play() 
+{
+    // 通知子进程结束
+    Shm s;
+    parent_get_shm(&s);
+    kill(s.child_pid, SIGUSR1);
+
+    // 结束mplayer
+    write_fifo("quit\n");
+
+    // 回收子进程资源
+    int status;
+    waitpid(s.child_pid, &status, 0);
+
+    // 修改标志位
+    g_start_flag = 0;
+    g_suspend_flag = 0;
+}
+
