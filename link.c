@@ -102,11 +102,6 @@ int link_find_next(int mode, char *cur, char *next)
 {
     if (NULL == cur || NULL == next)
         return -1;
-    if (mode == CIRCLE)
-    {
-        strcpy(next, cur);
-        return 0;
-    }
 
     Node *p = g_music_head->next;
 
@@ -118,6 +113,12 @@ int link_find_next(int mode, char *cur, char *next)
         
         p = p->next;    
     }
+
+    if (mode == CIRCLE)
+    {
+        strcpy(next, p->music_name);
+        return 0;
+    } 
 
     if (p->next == NULL)    // 已经是最后一首歌
         return -1;

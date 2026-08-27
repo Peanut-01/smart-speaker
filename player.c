@@ -409,3 +409,14 @@ void player_volumn_down()
     device_set_volume(volume);
     printf("------ 音量减小 ------");    
 }
+
+
+// 修改播放模式
+void player_set_mode(int mode)
+{
+    Shm s;
+    parent_get_shm(&s);
+    s.cur_mode = mode;
+    parent_set_shm(&s);
+    printf("------修改播放模式成功------\n");
+}

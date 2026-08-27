@@ -29,7 +29,7 @@ void show_menu()
     printf("\t3.暂停播放        4.继续播放\n");
     printf("\t5.下一首          6.上一首\n");
     printf("\t7.增加音量        8.减小音量\n");
-    printf("\t9.单曲循环        10.顺序播放\n");
+    printf("\t9.单曲循环        a.顺序播放\n");
 }
 
 
@@ -67,6 +67,12 @@ void select_read_stdio()
         break;
     case '8':
         player_volumn_down();
+        break;
+    case '9':
+        player_set_mode(CIRCLE);
+        break;
+    case 'a':
+        player_set_mode(SEQUENCE);
         break;
     }
 }

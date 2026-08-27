@@ -38,6 +38,7 @@ void player_next_play();
 void player_prior_play(); 
 void player_volumn_up();
 void player_volumn_down();
+void player_set_mode(int mode);
         
 
 #endif // _PLAYER_H
