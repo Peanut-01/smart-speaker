@@ -35,5 +35,6 @@ void player_stop_play();
 void player_continue_play();
 void player_suspend_play();
 void player_next_play();
+void player_prior_play();
 
 #endif // _PLAYER_H

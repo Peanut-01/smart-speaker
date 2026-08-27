@@ -318,9 +318,53 @@ void player_next_play()
     strcpy(music_path, ONLINE_URL);
     strcat(music_path, music);
 
+    // 让孙进程的mplayer立即切换歌曲
     sprintf(cmd, "loadfile %s\n", music_path);
     write_fifo(cmd);
 
+    //更改标志位
+    g_start_flag = 1;
+    g_suspend_flag = 0;
+}
+
+
+// 播放上一首
+void player_prior_play()
+{
+    if (g_start_flag == 0)
+        return;
+
+    // 读取共享内存，找到当前歌曲
+    Shm s;
+    parent_get_shm(&s);
+
+    // 遍历链表，根据当前歌曲找到下一首
+    char music[128] = {0};
+    link_find_prior(s.cur_music, music);
+
+    // 更新共享内存
+    if (g_device_mode == ONLINE_MODE)
+    {
+        const char *p = music;
+        while (*p != '/')
+            p++;
+
+        strncpy(s.cur_singer, music, p - music);
+        strcpy(s.cur_music, p + 1);
+    }
+    parent_set_shm(&s);
+
+    // 写管道播放新的歌曲
+    char music_path[128] = {0};
+    char cmd[258] = {0};
+    strcpy(music_path, ONLINE_URL);
+    strcat(music_path, music);
+
+    // 让孙进程的mplayer立即切换歌曲
+    sprintf(cmd, "loadfile %s\n", music_path);
+    write_fifo(cmd);
+
+    //更改标志位
     g_start_flag = 1;
     g_suspend_flag = 0;
 }

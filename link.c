@@ -141,3 +141,29 @@ void link_clear_list()
     g_music_head->next = NULL;
     
 }
+
+
+// 根据当前歌曲找到上一首
+void link_find_prior(const char *cur, char *music)
+{
+    if (NULL == cur || NULL == music)
+        return;
+
+    Node *p = g_music_head->next;
+    if (strstr(p->music_name, cur))
+    {
+        // 已经是第一首歌
+        strcpy(music, p->music_name);
+        return;
+    }
+
+    while (p)
+    {
+        if (strstr(p->music_name, cur)) 
+        {
+            strcpy(music, p->prior->music_name);
+            return;
+        }
+        p = p->next;
+    }
+}
