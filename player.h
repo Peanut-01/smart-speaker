@@ -32,5 +32,7 @@ void child_process(char *name);
 void parent_get_shm(Shm *s);
 void child_quit_process(int sig);
 void player_stop_play();
+void player_continue_play();
+void player_suspend_play();
 
 #endif // _PLAYER_H

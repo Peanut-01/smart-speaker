@@ -36,11 +36,9 @@ void show_menu()
 void select_read_stdio()
 {
     char ch;
-    scanf("%c", &ch);
+    scanf(" %c", &ch);
 
     printf("[SELECT] 读到键盘数据 [%c]\n", ch);
-
-    getchar();
 
     switch (ch)
     {
@@ -49,6 +47,12 @@ void select_read_stdio()
         break;
     case '2':
         player_stop_play();
+        break;
+    case '3':
+        player_suspend_play();
+        break;
+    case '4':
+        player_continue_play();
         break;
     }
 }

@@ -15,8 +15,8 @@
 
 
 int g_shmid = 0;        // 共享内存id
-int g_start_flag = 0;   // 是否开始
-int g_suspend_flag = 0; // 是否暂停
+int g_start_flag = 0;   // 是否开始  0-未开始; 1-开始
+int g_suspend_flag = 0; // 是否暂停  0-未暂停; 1-暂停
 int g_device_mode = ONLINE_MODE; //在线模式
 
 extern Node *g_music_head;
@@ -186,7 +186,7 @@ void child_process(char *name)
             arg[4] = "-input";
             arg[5] = "file=/home/fifo/cmd_fifo";
 
-            if(execv("/usr/bin/mplayer", arg) == -1)
+            if (execv("/usr/bin/mplayer", arg) == -1)
             {
                 fprintf(stderr, "[ERROR] MPLAYER启动失败");
             }
@@ -211,7 +211,7 @@ int write_fifo(const char *cmd)
         return -1;
     }
 
-    if (write(fd, cmd, strlen(cmd)))
+    if (write(fd, cmd, strlen(cmd)) == -1)
     {
         perror("WRITE FIFO");
         close(fd);
@@ -241,5 +241,29 @@ void player_stop_play()
     // 修改标志位
     g_start_flag = 0;
     g_suspend_flag = 0;
+}
+
+
+// 暂停播放
+void player_suspend_play()
+{
+    if (g_start_flag == 0 || g_suspend_flag == 1)
+        return;
+    
+    write_fifo("pause\n");
+    g_suspend_flag = 1;
+    printf("-------暂停播放--------");
+}
+
+
+// 继续播放
+void player_continue_play()
+{
+    if (g_start_flag == 0 || g_suspend_flag == 0)
+        return;
+    
+    write_fifo("pause\n");
+    g_suspend_flag = 0;
+    printf("-------继续播放--------");
 }
 
