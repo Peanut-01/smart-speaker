@@ -56,6 +56,9 @@ void select_read_stdio()
     case '4':
         player_continue_play();
         break;
+    case '5':
+        player_next_play();
+        break;
     }
 }
 

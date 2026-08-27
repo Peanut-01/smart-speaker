@@ -4,6 +4,7 @@
 #include "player.h"
 #include <string.h>
 #include "link.h"
+#include "socket.h"
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -111,7 +112,8 @@ void player_play_music(char *name)
         exit(0);
     } 
     else
-    {
+    {   
+        // 父进程立刻返回
         return;
     }
 }
@@ -155,8 +157,8 @@ void child_process(char *name)
                     exit(0);
                 }
             }
-            // 修改共享内存
 
+            // 修改共享内存
             s.child_pid = getppid();
             s.grand_pid = getpid();
             if (g_device_mode == ONLINE_MODE)
@@ -190,9 +192,10 @@ void child_process(char *name)
             {
                 fprintf(stderr, "[ERROR] MPLAYER启动失败");
             }
-        } 
-        else                // 子进程
+        }
+        else                
         {   
+            // 子进程
             // 清空子进程的name数组
             memset(name, 0, strlen(name));
             int status;
@@ -267,3 +270,56 @@ void player_continue_play()
     printf("-------继续播放--------\n");
 }
 
+
+void player_next_play()
+{
+    if (g_start_flag == 0)
+        return;
+
+    // 读取共享内存，找到当前歌曲
+    Shm s;
+    parent_get_shm(&s);
+    // 遍历链表，根据当前歌曲找到下一首
+    char music[128] = {0};
+    if (link_find_next(SEQUENCE, s.cur_music, music) == -1)  // 已经是最后一首歌了
+    {   
+        if (g_device_mode == ONLINE_MODE)
+        {
+            // 结束播放
+            player_stop_play();
+            // 清空链表
+            link_clear_list();
+            // 请求新的音乐数据
+            socket_get_music(s.cur_singer);
+            // 开始播放
+            player_start_play();
+
+            return;
+        }
+
+    }
+
+    // 更新共享内存
+    if (g_device_mode == ONLINE_MODE)
+    {
+        const char *p = music;
+        while (*p != '/')
+            p++;
+
+        strncpy(s.cur_singer, music, p - music);
+        strcpy(s.cur_music, p + 1);
+    }
+    parent_set_shm(&s);
+
+    // 写管道播放新的歌曲
+    char music_path[128] = {0};
+    char cmd[258] = {0};
+    strcpy(music_path, ONLINE_URL);
+    strcat(music_path, music);
+
+    sprintf(cmd, "loadfile %s\n", music_path);
+    write_fifo(cmd);
+
+    g_start_flag = 1;
+    g_suspend_flag = 1;
+}
