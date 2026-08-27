@@ -271,6 +271,7 @@ void player_continue_play()
 }
 
 
+// 播放下一首
 void player_next_play()
 {
     if (g_start_flag == 0)
@@ -321,5 +322,5 @@ void player_next_play()
     write_fifo(cmd);
 
     g_start_flag = 1;
-    g_suspend_flag = 1;
+    g_suspend_flag = 0;
 }
