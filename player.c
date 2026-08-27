@@ -5,6 +5,7 @@
 #include <string.h>
 #include "link.h"
 #include "socket.h"
+#include "device.h"
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -367,4 +368,44 @@ void player_prior_play()
     //更改标志位
     g_start_flag = 1;
     g_suspend_flag = 0;
+}
+
+
+// 增加音量，增加10%
+void player_volumn_up()
+{
+    int volume;
+    device_get_volume(&volume);
+
+    if (volume < 90)
+        volume += 10;
+    else if (volume >= 90 && volume < 100)
+        volume = 100;
+    else if (volume == 100) {
+        printf("------ 音量已经最大 ---------");
+        return;
+    }
+    
+    device_set_volume(volume);
+    printf("------ 音量增大 ------");    
+}
+
+
+// 降低音量，降低10%
+void player_volumn_down()
+{
+    int volume;
+    device_get_volume(&volume);
+
+    if (volume > 10)
+        volume -= 10;
+    else if (volume <= 10 && volume > 0)
+        volume = 0;
+    else if (volume == 0) {
+        printf("------ 音量已经最小 ---------");
+        return;
+    }
+    
+    device_set_volume(volume);
+    printf("------ 音量减小 ------");    
 }

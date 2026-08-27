@@ -62,6 +62,12 @@ void select_read_stdio()
     case '6':
         player_prior_play();
         break;
+    case '7':
+        player_volumn_up();
+        break;
+    case '8':
+        player_volumn_down();
+        break;
     }
 }
 

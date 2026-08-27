@@ -52,6 +52,7 @@ int device_set_volume(int volume)
 }
 
 
+// 获取音量，单位%
 int device_get_volume(int *value)
 {
     snd_mixer_t *mixer;
