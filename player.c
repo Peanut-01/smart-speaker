@@ -246,6 +246,8 @@ void child_process(char *name)
             if (execv("/usr/bin/mplayer", arg) == -1)
             {
                 fprintf(stderr, "[ERROR] MPLAYER启动失败");
+                kill(s.child_pid, SIGUSR1);  // 通知子进程修改标志位
+                exit(-1);
             }
         }
         else                

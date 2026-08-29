@@ -82,7 +82,7 @@ void select_read_stdio()
 
 
 // 解析数据
-void parse_message(buf, cmd)
+void parse_message(const char *buf, char *cmd)
 {
     struct json_object *obj = json_tokener_parse(buf);
     if (NULL == obj)

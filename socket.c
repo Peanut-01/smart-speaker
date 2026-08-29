@@ -205,6 +205,8 @@ void socket_recv_data(char *msg)
             g_maxfd = (g_maxfd == g_sockfd) ? (g_maxfd - 1) : g_maxfd;
             close(g_sockfd);
             pthread_cancel(tid);
+
+            return;
         }
         
     }
