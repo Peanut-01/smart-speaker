@@ -7,5 +7,6 @@
 int init_socket();
 void socket_recv_data(char *msg);
 void socket_get_music(const char *singer);
+void socket_start_play();
 
 #endif // _SOCKET_H

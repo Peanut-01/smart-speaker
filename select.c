@@ -3,8 +3,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include "player.h"
 #include <pthread.h>
+#include <string.h>
+#include <json/json.h>
+#include "player.h"
+#include "socket.h"
 
 
 fd_set READSET;
@@ -78,6 +81,51 @@ void select_read_stdio()
 }
 
 
+// 解析数据
+void parse_message(buf, cmd)
+{
+    struct json_object *obj = json_tokener_parse(buf);
+    if (NULL == obj)
+    {
+        fprintf(stderr, "[ERROR] 不是一个json格式\n");
+        return;
+    }
+
+    struct json_object *value;
+    value = json_object_object_get(obj, "cmd");
+    if (NULL == value)
+    {
+        fprintf(stderr, "[ERROR] 没有包含 cmd 字段\n");
+        json_object_put(obj);
+        return;
+    }
+
+    strcpy(cmd, json_object_get_string(value));
+    json_object_put(obj);
+
+}
+
+
+// 读取数据
+void select_read_socket()
+{
+    char buf[1024] = {0};
+    char cmd[32] = {0};
+
+    socket_recv_data(buf);
+    parse_message(buf, cmd);
+
+    if (!strcmp(cmd, "app_start"))
+    {
+        socket_start_play();
+    }
+    else
+    {
+        printf("不匹配");
+    }
+}
+
+
 void m_select()
 {
     fd_set TMPSET;
@@ -100,11 +148,7 @@ void m_select()
         }
         else if (FD_ISSET(g_sockfd, &TMPSET))   // 网络可读
         {
-            // 临时处理代码
-            FD_CLR(g_sockfd, &READSET);
-            g_maxfd = (g_maxfd == g_sockfd) ? (g_maxfd - 1) : g_maxfd;
-            close(g_sockfd);
-            pthread_cancel(tid);
+            select_read_socket();
         }
         
     }

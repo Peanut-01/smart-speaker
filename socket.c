@@ -189,6 +189,7 @@ void socket_get_music(const char *singer)
 }
 
 
+// 接收服务端的信息
 void socket_recv_data(char *msg)
 {
     int len = 0;
@@ -198,6 +199,14 @@ void socket_recv_data(char *msg)
         size += recv(g_sockfd, msg + size, sizeof(int) - size, 0);
         if (size >= sizeof(int))
             break;
+        else if (0 == size)
+        {
+            FD_CLR(g_sockfd, &READSET);
+            g_maxfd = (g_maxfd == g_sockfd) ? (g_maxfd - 1) : g_maxfd;
+            close(g_sockfd);
+            pthread_cancel(tid);
+        }
+        
     }
 
     len = *(int *)msg;
@@ -211,5 +220,29 @@ void socket_recv_data(char *msg)
             break;
     }
 
-    printf("[RECV] len %d ms %s\n", len, msg);
+    printf("[RECV] len: %d ; msg: %s\n", len, msg);
+}
+
+
+void socket_start_play()
+{
+    struct json_object *obj = json_object_new_object();
+    json_object_object_add(obj, "cmd", json_object_new_string("app_start_reply"));
+    // 开始播放
+    player_start_play();
+    // 判断结果
+    char result[128] = {0};
+    FILE *fp = popen("pgrep mplayer", "r");
+    fgets(result, 128, fp);
+
+    if (strlen(result) == 0)
+    {
+        json_object_object_add(obj, "result", json_object_new_string("failure"));
+    }
+    else
+    {
+        json_object_object_add(obj, "result", json_object_new_string("success"));
+    } 
+    // 返回结果
+    socket_send_data(obj);
 }

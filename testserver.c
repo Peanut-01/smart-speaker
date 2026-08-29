@@ -153,7 +153,11 @@ int main()
     pthread_t tid;
     pthread_create(&tid, NULL, recv_client, &fd);
 
+    sleep(2);
 
+    struct json_object *obj = json_object_new_object();
+    json_object_object_add(obj, "cmd", json_object_new_string("app_start"));
+    server_send_data(fd, obj);
 
     while (1)
     {
