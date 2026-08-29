@@ -119,6 +119,11 @@ void select_read_socket()
     {
         socket_start_play();
     }
+    else if (!strcmp(cmd, "app_stop"))
+    {
+        socket_stop_play();
+    }
+    
     else
     {
         printf("不匹配");

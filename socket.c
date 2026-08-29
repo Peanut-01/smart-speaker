@@ -226,6 +226,7 @@ void socket_recv_data(char *msg)
 }
 
 
+// 开始播放
 void socket_start_play()
 {
     struct json_object *obj = json_object_new_object();
@@ -244,6 +245,31 @@ void socket_start_play()
     else
     {
         json_object_object_add(obj, "result", json_object_new_string("success"));
+    } 
+    // 返回结果
+    socket_send_data(obj);
+}
+
+
+// 停止播放
+void socket_stop_play()
+{
+    struct json_object *obj = json_object_new_object();
+    json_object_object_add(obj, "cmd", json_object_new_string("app_stop_reply"));
+    // 开始播放
+    player_stop_play();
+    // 判断结果
+    char result[128] = {0};
+    FILE *fp = popen("pgrep mplayer", "r");
+    fgets(result, 128, fp);
+
+    if (strlen(result) == 0)
+    {   
+        json_object_object_add(obj, "result", json_object_new_string("success"));
+    }
+    else
+    {
+        json_object_object_add(obj, "result", json_object_new_string("failure"));
     } 
     // 返回结果
     socket_send_data(obj);
