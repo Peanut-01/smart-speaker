@@ -1,11 +1,16 @@
 #!/bin/bash
 
-id=`ipcs | grep 3e8 | awk {'print $2'}`
+shmid=`ipcs | grep 3e8 | awk {'print $2'}`
 
-if [ ! -z $id ]; then
-    ipcrm -m $id
+if [ ! -z $shmid ]; then
+    ipcrm -m $shmid
 fi
 
+semid=`ipcs | grep 4d2 | awk {'print $2'}`
+
+if [ ! -z $semid ]; then
+    ipcrm -s $semid
+fi
 
 rm -irf /home/fifo
 

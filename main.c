@@ -40,6 +40,14 @@ int main()
     }
     printf("共享内存初始化成功\n");
 
+    // 初始化共享内存
+    if (init_sem() == -1)
+    {
+        printf("信号量初始化失败\n");
+        return -1;
+    }
+    printf("信号量初始化成功\n");
+
     // 初始化音量
     device_set_volume(DEF_VOLUME);
 

@@ -7,6 +7,9 @@
 #define SHMKEY 1000
 #define SHMSIZE 4096
 
+// 信号量key
+#define SEMKEY 1234
+
 #define SEQUENCE 1
 #define CIRCLE 2
 
@@ -25,6 +28,19 @@ typedef struct Shm
     pid_t grand_pid;
 } Shm;
 
+
+union semun 
+{
+    int              val;    /* Value for SETVAL */
+    struct semid_ds *buf;    /* Buffer for IPC_STAT, IPC_SET */
+    unsigned short  *array;  /* Array for GETALL, SETALL */
+    struct seminfo  *__buf;  /* Buffer for IPC_INFO
+                                (Linux-specific) */
+};
+
+
+
+int init_sem();
 int init_shm();
 void player_start_play();
 void player_play_music(char *name) ;
@@ -39,6 +55,8 @@ void player_prior_play();
 void player_volumn_up();
 void player_volumn_down();
 void player_set_mode(int mode);
+void player_sem_p();
+void player_sem_v();
         
 
 #endif // _PLAYER_H

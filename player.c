@@ -14,14 +14,17 @@
 #include <signal.h>
 #include <fcntl.h>
 #include <fcntl.h>
+#include <sys/sem.h>
 
 
 int g_shmid = 0;        // 共享内存id
+int g_semid = 0;        // 信号量标识
 int g_start_flag = 0;   // 是否开始  0-未开始; 1-开始
 int g_suspend_flag = 0; // 是否暂停  0-未暂停; 1-暂停
 int g_device_mode = ONLINE_MODE; //在线模式
 
 extern Node *g_music_head;
+
 
 int init_shm()
 {
@@ -48,6 +51,56 @@ int init_shm()
     shmdt(addr);
 
     return 0;
+}
+
+
+// 初始化信号量
+int init_sem()
+{
+    g_semid = semget(SEMKEY, 1, IPC_CREAT | IPC_EXCL);
+    if (g_semid == -1)
+    {
+        perror("semget");
+        return -1;
+    }
+
+    union semun s;
+    s.val = 1;
+    if (semctl(g_semid, 0, SETVAL, s) == -1)
+    {
+        perror("semctl");
+        return -1;
+    }
+
+    return 0;
+}
+
+
+// 尝试获取并加锁
+void player_sem_p()
+{
+    struct sembuf s;
+    s.sem_flg = SEM_UNDO;
+    s.sem_num = 0;
+    s.sem_op = -1;
+    if (semop(g_semid, &s, 1) == -1)
+    {
+        perror("semop");
+    }
+}
+
+
+// 解锁
+void player_sem_v()
+{
+    struct sembuf s;
+    s.sem_flg = SEM_UNDO;
+    s.sem_num = 0;
+    s.sem_op = 1;
+    if (semop(g_semid, &s, 1) == -1)
+    {
+        perror("semop");
+    }
 }
 
 
@@ -171,8 +224,9 @@ void child_process(char *name)
                 strncpy(s.cur_singer, name, p - name);
                 strcpy(s.cur_music, p + 1);
             }
-
+            player_sem_p();
             parent_set_shm(&s);
+            player_sem_v();
 
             char music_path[128] = {0};
 
@@ -311,7 +365,9 @@ void player_next_play()
         strncpy(s.cur_singer, music, p - music);
         strcpy(s.cur_music, p + 1);
     }
+    player_sem_p();
     parent_set_shm(&s);
+    player_sem_v();
 
     // 写管道播放新的歌曲
     char music_path[128] = {0};
@@ -353,7 +409,9 @@ void player_prior_play()
         strncpy(s.cur_singer, music, p - music);
         strcpy(s.cur_music, p + 1);
     }
+    player_sem_p();
     parent_set_shm(&s);
+    player_sem_v();
 
     // 写管道播放新的歌曲
     char music_path[128] = {0};
@@ -417,6 +475,8 @@ void player_set_mode(int mode)
     Shm s;
     parent_get_shm(&s);
     s.cur_mode = mode;
+    player_sem_p();
     parent_set_shm(&s);
+    player_sem_v();
     printf("------修改播放模式成功------\n");
 }
