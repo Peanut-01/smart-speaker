@@ -161,6 +161,15 @@ int main()
 
     sleep(5);
 
+    json_object_object_add(obj, "cmd", json_object_new_string("app_suspend"));
+    server_send_data(fd, obj);
+
+    sleep(5);
+
+    json_object_object_add(obj, "cmd", json_object_new_string("app_continue"));
+    server_send_data(fd, obj);
+
+    sleep(5);
     json_object_object_add(obj, "cmd", json_object_new_string("app_stop"));
     server_send_data(fd, obj);
 

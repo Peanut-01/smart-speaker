@@ -248,6 +248,8 @@ void socket_start_play()
     } 
     // 返回结果
     socket_send_data(obj);
+
+    json_object_put(obj);
 }
 
 
@@ -273,4 +275,38 @@ void socket_stop_play()
     } 
     // 返回结果
     socket_send_data(obj);
+
+    json_object_put(obj);
+}
+
+
+// 暂停播放
+void socket_suspend_play()
+{
+    struct json_object *obj = json_object_new_object();
+    json_object_object_add(obj, "cmd", json_object_new_string("app_suspend_reply"));
+    // 暂停播放
+    player_suspend_play();
+    // 发送结果
+    json_object_object_add(obj, "result", json_object_new_string("success"));
+    // 返回结果
+    socket_send_data(obj);
+
+    json_object_put(obj);
+}
+
+
+// 继续播放
+void socket_continue_play()
+{
+    struct json_object *obj = json_object_new_object();
+    json_object_object_add(obj, "cmd", json_object_new_string("app_continue_reply"));
+    // 继续播放
+    player_continue_play();
+    // 发送结果
+    json_object_object_add(obj, "result", json_object_new_string("success"));
+    // 返回结果
+    socket_send_data(obj);
+
+    json_object_put(obj);
 }

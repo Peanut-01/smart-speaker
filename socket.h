@@ -9,5 +9,7 @@ void socket_recv_data(char *msg);
 void socket_get_music(const char *singer);
 void socket_start_play();
 void socket_stop_play();
+void socket_suspend_play();
+void socket_continue_play();
 
 #endif // _SOCKET_H

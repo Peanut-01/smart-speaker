@@ -123,6 +123,14 @@ void select_read_socket()
     {
         socket_stop_play();
     }
+    else if (!strcmp(cmd, "app_suspend"))
+    {
+        socket_suspend_play();
+    }
+    else if (!strcmp(cmd, "app_continue"))
+    {
+        socket_continue_play();
+    }
     
     else
     {
