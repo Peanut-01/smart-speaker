@@ -11,5 +11,7 @@ void socket_start_play();
 void socket_stop_play();
 void socket_suspend_play();
 void socket_continue_play();
+void socket_next_play();
+void socket_prior_play();
 
 #endif // _SOCKET_H

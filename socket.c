@@ -310,3 +310,69 @@ void socket_continue_play()
 
     json_object_put(obj);
 }
+
+
+// 下一首
+void socket_next_play()
+{
+    struct json_object *obj = json_object_new_object();
+    json_object_object_add(obj, "cmd", json_object_new_string("app_next_reply"));
+
+    // 读取共享内存，获取当前歌曲
+    Shm old_info, new_info;
+    parent_get_shm(&old_info);
+    // 切歌
+    player_next_play();
+    // 再次获取歌曲
+    parent_get_shm(&new_info);
+    // 回复信息
+    if (strcmp(old_info.cur_music, new_info.cur_music))
+    {
+        // 歌曲不一样，判定为切歌成功
+        json_object_object_add(obj, "result", json_object_new_string("success"));
+        json_object_object_add(obj, "music", json_object_new_string(new_info.cur_music));
+    } 
+    else
+    {
+        // 歌曲一样，判定为切歌失败
+        json_object_object_add(obj, "result", json_object_new_string("failure"));
+    }
+
+    // 返回结果
+    socket_send_data(obj);
+
+    json_object_put(obj);
+}
+
+
+// 上一首
+void socket_prior_play()
+{
+    struct json_object *obj = json_object_new_object();
+    json_object_object_add(obj, "cmd", json_object_new_string("app_prior_reply"));
+
+    // 读取共享内存，获取当前歌曲
+    Shm old_info, new_info;
+    parent_get_shm(&old_info);
+    // 切歌
+    player_prior_play();
+    // 再次获取歌曲
+    parent_get_shm(&new_info);
+    // 回复信息
+    if (strcmp(old_info.cur_music, new_info.cur_music))
+    {
+        // 歌曲不一样，判定为切歌成功
+        json_object_object_add(obj, "result", json_object_new_string("success"));
+        json_object_object_add(obj, "music", json_object_new_string(new_info.cur_music));
+    } 
+    else
+    {
+        // 歌曲一样，判定为切歌失败
+        json_object_object_add(obj, "result", json_object_new_string("failure"));
+    }
+
+    // 返回结果
+    socket_send_data(obj);
+
+    json_object_put(obj);
+}

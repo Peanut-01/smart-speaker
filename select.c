@@ -131,6 +131,14 @@ void select_read_socket()
     {
         socket_continue_play();
     }
+    else if (!strcmp(cmd, "app_next"))
+    {
+        socket_next_play();
+    }
+    else if (!strcmp(cmd, "app_prior"))
+    {
+        socket_prior_play();
+    }
     
     else
     {
