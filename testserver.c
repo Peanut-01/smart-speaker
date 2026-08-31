@@ -161,17 +161,17 @@ int main()
 
     sleep(5);
 
-    json_object_object_add(obj, "cmd", json_object_new_string("app_next"));
+    json_object_object_add(obj, "cmd", json_object_new_string("app_voice_down"));
     server_send_data(fd, obj);
 
     sleep(5);
 
-    json_object_object_add(obj, "cmd", json_object_new_string("app_prior"));
+    json_object_object_add(obj, "cmd", json_object_new_string("app_voice_up"));
     server_send_data(fd, obj);
 
-    sleep(5);
-    json_object_object_add(obj, "cmd", json_object_new_string("app_stop"));
-    server_send_data(fd, obj);
+    // sleep(5);
+    // json_object_object_add(obj, "cmd", json_object_new_string("app_stop"));
+    // server_send_data(fd, obj);
 
     while (1)
     {

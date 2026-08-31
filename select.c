@@ -139,7 +139,14 @@ void select_read_socket()
     {
         socket_prior_play();
     }
-    
+    else if (!strcmp(cmd, "app_voice_up"))
+    {
+        socket_volumn_up();
+    }
+    else if (!strcmp(cmd, "app_voice_down"))
+    {
+        socket_volumn_down();
+    }
     else
     {
         printf("不匹配");

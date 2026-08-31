@@ -376,3 +376,83 @@ void socket_prior_play()
 
     json_object_put(obj);
 }
+
+
+// 增加音量
+void socket_volumn_up()
+{
+    struct json_object *obj = json_object_new_object();
+    json_object_object_add(obj, "cmd", json_object_new_string("app_voice_up_reply"));
+    // 获取当前音量
+    int old;
+    device_get_volume(&old);
+    if (old == 100)
+    {
+        // 已经是最大音量
+        json_object_object_add(obj, "result", json_object_new_string("success"));
+        json_object_object_add(obj, "voice", json_object_new_int(100));
+        socket_send_data(obj);
+        json_object_put(obj);
+        return;
+    }
+    // 调整音量
+    player_volumn_up();
+    // 再次获取
+    int new;
+    device_get_volume(&new);
+    // 比较并返回结果
+    if (new <= old)
+    {
+        // 调节失败
+        json_object_object_add(obj, "result", json_object_new_string("failure"));
+    }
+    else
+    {
+        // 调节成功
+        json_object_object_add(obj, "result", json_object_new_string("success"));
+        json_object_object_add(obj, "voice", json_object_new_int(new));
+    }
+
+    socket_send_data(obj);
+    json_object_put(obj);
+}
+
+
+// 降低音量
+void socket_volumn_down()
+{
+    struct json_object *obj = json_object_new_object();
+    json_object_object_add(obj, "cmd", json_object_new_string("app_voice_down_reply"));
+    // 获取当前音量
+    int old;
+    device_get_volume(&old);
+    if (old == 0)
+    {
+        // 已经是最小音量
+        json_object_object_add(obj, "result", json_object_new_string("success"));
+        json_object_object_add(obj, "voice", json_object_new_int(0));
+        socket_send_data(obj);
+        json_object_put(obj);
+        return;
+    }
+    // 调整音量
+    player_volumn_down();
+    // 再次获取
+    int new;
+    device_get_volume(&new);
+    // 比较并返回结果
+    if (new >= old)
+    {
+        // 调节失败
+        json_object_object_add(obj, "result", json_object_new_string("failure"));
+    }
+    else
+    {
+        // 调节成功
+        json_object_object_add(obj, "result", json_object_new_string("success"));
+        json_object_object_add(obj, "voice", json_object_new_int(new));
+    }
+
+    socket_send_data(obj);
+    json_object_put(obj);
+}

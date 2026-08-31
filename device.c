@@ -95,6 +95,8 @@ int device_get_volume(int *value)
 
     *value = (volume - min) * 100 / (max - min);
 
+    *value = (*value + 5) / 10 * 10;
+
     snd_mixer_close(mixer);
 
     return 0;
