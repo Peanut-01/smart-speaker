@@ -456,3 +456,50 @@ void socket_volumn_down()
     socket_send_data(obj);
     json_object_put(obj);
 }
+
+
+// 修改播放模式
+void socket_set_mode(int mode)
+{
+    struct json_object *obj = json_object_new_object();
+
+    if (mode == SEQUENCE) 
+    {
+        json_object_object_add(obj, "cmd", json_object_new_string("app_sequence_reply"));
+    }
+    else
+    {
+        json_object_object_add(obj, "cmd", json_object_new_string("app_circle_reply"));
+    }
+
+    // 读取共享内存并判断
+    Shm old;
+    parent_get_shm(&old);
+
+    // 如果已经是当前模式，直接返回成功
+    if (old.cur_mode == mode)
+    {
+        json_object_object_add(obj, "result", json_object_new_string("success"));
+        socket_send_data(obj);
+        json_object_put(obj);
+        return;
+    }
+    // 修改播放模式
+    player_set_mode(mode);
+    // 读取并对比播放模式
+    Shm new;
+    parent_get_shm(&new);
+
+    if (new.cur_mode != old.cur_mode)
+    {
+        json_object_object_add(obj, "result", json_object_new_string("success"));
+    }
+    else
+    {
+        json_object_object_add(obj, "result", json_object_new_string("failure"));
+    }
+    
+    // 返回结果
+    socket_send_data(obj);
+    json_object_put(obj);
+}

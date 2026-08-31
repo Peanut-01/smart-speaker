@@ -15,5 +15,6 @@ void socket_next_play();
 void socket_prior_play();
 void socket_volumn_up();
 void socket_volumn_down();
+void socket_set_mode(int mode);
 
 #endif // _SOCKET_H

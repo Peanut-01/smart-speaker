@@ -161,12 +161,12 @@ int main()
 
     sleep(5);
 
-    json_object_object_add(obj, "cmd", json_object_new_string("app_voice_down"));
+    json_object_object_add(obj, "cmd", json_object_new_string("app_circle"));
     server_send_data(fd, obj);
 
     sleep(5);
 
-    json_object_object_add(obj, "cmd", json_object_new_string("app_voice_up"));
+    json_object_object_add(obj, "cmd", json_object_new_string("app_sequence"));
     server_send_data(fd, obj);
 
     // sleep(5);

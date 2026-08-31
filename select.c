@@ -147,6 +147,14 @@ void select_read_socket()
     {
         socket_volumn_down();
     }
+    else if (!strcmp(cmd, "app_circle"))
+    {
+        socket_set_mode(CIRCLE);
+    }
+    else if (!strcmp(cmd, "app_sequence"))
+    {
+        socket_set_mode(SEQUENCE);
+    }
     else
     {
         printf("不匹配");
