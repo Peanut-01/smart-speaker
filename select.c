@@ -8,11 +8,13 @@
 #include <json/json.h>
 #include "player.h"
 #include "socket.h"
+#include "device.h"
 
 
 fd_set READSET;
 extern int g_maxfd;
 extern int g_sockfd;
+extern int g_buttonfd;
 extern pthread_t tid;
 
 
@@ -162,6 +164,12 @@ void select_read_socket()
 }
 
 
+void select_read_button()
+{
+    device_read_button();
+}
+
+
 void m_select()
 {
     fd_set TMPSET;
@@ -185,7 +193,12 @@ void m_select()
         else if (FD_ISSET(g_sockfd, &TMPSET))   // 网络可读
         {
             select_read_socket();
+        } 
+        else if (FD_ISSET(g_buttonfd, &TMPSET))   // 按键可读
+        {
+            select_read_button();
         }
+        
         
     }
     

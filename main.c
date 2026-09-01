@@ -17,6 +17,8 @@ int main()
 
     signal(SIGUSR1, socket_update_music);
 
+    signal(SIGPIPE, button_handler);
+
     // 初始化集合   select
     if (init_select() != 0)
     {
@@ -60,6 +62,15 @@ int main()
     printf("网络初始化成功\n");
 
     // 初始化按键
+    if (init_button() == -1)
+    {
+        printf("按键初始化失败\n");
+        return -1;
+    }
+    else
+    {
+        printf("按键初始化成功\n");
+    }
 
     // 获取音乐文件（歌手 / 名字）
     socket_get_music("其他");
