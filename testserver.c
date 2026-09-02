@@ -82,16 +82,16 @@ void *recv_client(void* arg)
             json_object_object_add(snd_obj, "cmd", json_object_new_string("reply_music"));
 
             struct json_object *array = json_object_new_array();
-            // json_object_array_add(array, json_object_new_string("其他/以后的以后.mp3"));
-            // json_object_array_add(array, json_object_new_string("其他/倾国倾城.mp3"));
-            // json_object_array_add(array, json_object_new_string("其他/童话.mp3"));
-            // json_object_array_add(array, json_object_new_string("其他/那些年.mp3"));
-            // json_object_array_add(array, json_object_new_string("其他/一直想着他.mp3"));
-            json_object_array_add(array, json_object_new_string("其他/1.mp3"));
-            json_object_array_add(array, json_object_new_string("其他/2.mp3"));
-            json_object_array_add(array, json_object_new_string("其他/3.mp3"));
-            json_object_array_add(array, json_object_new_string("其他/4.mp3"));
-            json_object_array_add(array, json_object_new_string("其他/5.mp3"));
+            json_object_array_add(array, json_object_new_string("其他/以后的以后.mp3"));
+            json_object_array_add(array, json_object_new_string("其他/倾国倾城.mp3"));
+            json_object_array_add(array, json_object_new_string("其他/童话.mp3"));
+            json_object_array_add(array, json_object_new_string("其他/那些年.mp3"));
+            json_object_array_add(array, json_object_new_string("其他/一直想着他.mp3"));
+            // json_object_array_add(array, json_object_new_string("其他/1.mp3"));
+            // json_object_array_add(array, json_object_new_string("其他/2.mp3"));
+            // json_object_array_add(array, json_object_new_string("其他/3.mp3"));
+            // json_object_array_add(array, json_object_new_string("其他/4.mp3"));
+            // json_object_array_add(array, json_object_new_string("其他/5.mp3"));
 
             json_object_object_add(snd_obj, "music", array);
 
@@ -159,10 +159,10 @@ int main()
     json_object_object_add(obj, "cmd", json_object_new_string("app_start"));
     server_send_data(fd, obj);
 
-    sleep(5);
+    // sleep(5);
 
-    json_object_object_add(obj, "cmd", json_object_new_string("app_circle"));
-    server_send_data(fd, obj);
+    // json_object_object_add(obj, "cmd", json_object_new_string("app_circle"));
+    // server_send_data(fd, obj);
 
     // sleep(5);
 

@@ -17,7 +17,7 @@ int main()
 
     signal(SIGUSR1, socket_update_music);
 
-    signal(SIGPIPE, button_handler);
+    signal(SIGALRM, button_handler);
 
     // 初始化集合   select
     if (init_select() != 0)
