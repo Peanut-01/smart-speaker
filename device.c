@@ -10,6 +10,7 @@
 int g_buttonfd = 0;
 BUTTON_STATE state = STATE_IDLE;
 struct itimerval tv;
+struct timeval old, new;
 
 extern fd_set READSET;
 extern int g_maxfd;
@@ -139,7 +140,6 @@ int init_button()
 void device_read_button()
 {
     struct input_event ev;
-    struct timeval old, new;
 
     int ret = read(g_buttonfd, &ev, sizeof(ev));
     if (-1 == ret)

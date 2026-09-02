@@ -1,8 +1,11 @@
 #if !defined(_DEVICE_H)
 #define _DEVICE_H
 
-#define CARD_NAME "hw:AudioPCI"
-#define ELEM_NAME "Master"
+// #define CARD_NAME "hw:AudioPCI"
+// #define ELEM_NAME "Master"
+
+#define CARD_NAME "hw:audiocodec"
+#define ELEM_NAME "lineout volume"
 
 typedef enum {
 	STATE_IDLE,
