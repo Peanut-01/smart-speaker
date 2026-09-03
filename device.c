@@ -163,7 +163,7 @@ void device_read_button()
         }
         else if (state == STATE_FIRST_RELEASE)
         {
-            //printf("双击\n");
+            printf("双击\n");
             player_next_play();
 
             state = STATE_IDLE;
@@ -188,7 +188,7 @@ void device_read_button()
             {
                 state = STATE_IDLE;
                 player_prior_play();
-                //printf("长按\n");
+                printf("长按\n");
             }
             else
             {
@@ -206,7 +206,7 @@ void device_read_button()
 }
 
 
-// 按键处理函数
+// 按键处理函数（短按）
 void button_handler(int sig)
 {
     if (g_start_flag == 0)
