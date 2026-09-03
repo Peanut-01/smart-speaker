@@ -180,11 +180,15 @@ void m_select()
     {
         TMPSET = READSET;
         int ret = select(g_maxfd + 1, &TMPSET, NULL, NULL, NULL);
-        if (-1 == ret && errno != EINTR)
-        {
-            perror("select");
-            continue;
-        }
+        if (-1 == ret && errno == EINTR)
+		{
+			continue;
+		}
+		else if (-1 == ret && errno != EINTR)
+		{
+			perror("select");
+			continue;
+		}
 
         if (FD_ISSET(STDIN_FILENO, &TMPSET))   // 键盘有数据可读
         {
