@@ -52,7 +52,7 @@ int main()
         }
 
         // 重采样
-        size_t resample_frames = frames_read * target_rate / sample_rate + 0.5; // 计算重采样后的帧数
+        size_t resample_frames = (size_t)((double)frames_read * target_rate / sample_rate + 0.5); // 计算重采样后的帧数
         int16_t *resample_buffer = malloc(resample_frames * CHANNELS * sizeof(int16_t));
         if (resample_buffer == NULL)
         {

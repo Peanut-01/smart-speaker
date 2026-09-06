@@ -45,8 +45,7 @@ int init_alsa()
     }
 
     // 7.设置缓冲区周期大小：1024
-    snd_pcm_uframes_t period_buffer = frams_per_buffer;
-    snd_pcm_hw_params_set_period_size_near(pcmp, params, &period_buffer, 0);
+    snd_pcm_hw_params_set_period_size_near(pcmp, params, &frams_per_buffer, 0);
 
     // 8.应用硬件参数
     snd_pcm_hw_params(pcmp, params);
