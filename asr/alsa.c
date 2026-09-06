@@ -65,7 +65,11 @@ void resample_linear(int16_t *input, int in_len,
 		return;
 
 	if (1 == in_len || 1 == out_len)
-		output[0] = input[0];
+    {
+        output[0] = input[0];
+        return;
+    }
+		
 
 	double ratio = (double)(in_len - 1) / (out_len - 1);
 
