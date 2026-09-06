@@ -1,10 +1,12 @@
 Target=asr
-Objects=alsa.o main.o
+Object=alsa.o main.o sherpa.o
 
-LDLIBS=-lasound
+CFLAGS=-I/home/sherpa/sherpa-onnx-v1.12.1-linux-aarch64-jni/include/
 
-$(Target): $(Objects)
-	gcc $(Objects) -o $(Target) $(LDLIBS)
+LDLIBS=-lasound -lonnxruntime -lsherpa-onnx-c-api -L/home/sherpa/sherpa-onnx-v1.12.1-linux-aarch64-shared-cpu/lib
+
+$(Target):$(Object)
+	gcc $(Object) -o $(Target) $(LDLIBS)
 
 clean:
 	rm -f $(Target) *.o
