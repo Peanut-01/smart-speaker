@@ -53,20 +53,6 @@ int init_alsa()
     // 9.准备PCM设备
     snd_pcm_prepare(pcmp);
 
-    snd_pcm_uframes_t actual_buffer, actual_period;
-    ret = snd_pcm_get_params(pcmp, &actual_buffer, &actual_period);
-    if (ret < 0) {
-        fprintf(stderr, "获取ALSA参数失败: %s\n", snd_strerror(ret));
-        return -1;
-    }
-
-    printf("[ALSA] rate=%u, read=%lu, period=%lu, buffer=%lu, capacity=%.1f ms\n",
-        sample_rate,
-        (unsigned long)frams_per_buffer,
-        (unsigned long)actual_period,
-        (unsigned long)actual_buffer,
-        1000.0 * actual_buffer / sample_rate);
-
     return 0;
 }
 
