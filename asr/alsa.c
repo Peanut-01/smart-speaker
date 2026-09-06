@@ -53,42 +53,45 @@ int init_alsa()
     // 9.准备PCM设备
     snd_pcm_prepare(pcmp);
 
+    snd_pcm_uframes_t actual_buffer, actual_period;
+    ret = snd_pcm_get_params(pcmp, &actual_buffer, &actual_period);
+    if (ret < 0) {
+        fprintf(stderr, "获取ALSA参数失败: %s\n", snd_strerror(ret));
+        return -1;
+    }
+
+    printf("[ALSA] rate=%u, read=%lu, period=%lu, buffer=%lu, capacity=%.1f ms\n",
+        sample_rate,
+        (unsigned long)frams_per_buffer,
+        (unsigned long)actual_period,
+        (unsigned long)actual_buffer,
+        1000.0 * actual_buffer / sample_rate);
+
     return 0;
 }
 
 
 // 线性插值重采样
-void resample_linear(const int16_t *input, size_t input_len, int16_t *output, size_t output_len)
+void resample_linear(int16_t *input, int in_len, 
+						int16_t *output, int out_len)
 {
-    if (0 == input_len || 0 == output_len)
-    {
-        return;
-    }
+	if (0 == in_len || 0 == out_len)
+		return;
 
-    if (1 == input_len || 1 == output_len)
-    {
-        output[0] = input[0];
-        return;
-    }
+	if (1 == in_len || 1 == out_len)
+		output[0] = input[0];
 
-    double ratio = (double)(input_len - 1) / (output_len - 1);
-    
-    for (size_t i = 0; i < output_len; ++i)
-    {
-        
-        // 计算输入帧的索引
-        double pos = (double)i * input_len / output_len;
-        size_t idx = (size_t)pos;
-        float deci = pos - idx;
+	double ratio = (double)(in_len - 1) / (out_len - 1);
 
-        // 线性插值
-        if (idx + 1 < input_len)
-        {
-            output[i] = (int16_t)((1.0f - deci) * input[idx] + deci * input[idx + 1] + 0.5f);
-        }
-        else
-        {
-            output[i] = input[input_len - 1]; // 如果索引超出范围，则直接使用最后一个样本
-        }
-    }
+	for (int i = 0; i < out_len; i++)
+	{
+		double pos = i * ratio;  //计算输出下标在输入里面的位置
+		size_t idx = (size_t)pos;   //整数部分
+		double deci = pos - idx;    //小数部分
+		
+		if (idx >= in_len - 1)
+			output[i] = input[in_len - 1];
+		else
+			output[i] = (int16_t)(input[idx] * (1.0 - deci) + input[idx + 1] * deci + 0.5);
+	}
 }
