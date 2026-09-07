@@ -58,8 +58,7 @@ int init_alsa()
 
 
 // 线性插值重采样
-void resample_linear(int16_t *input, int in_len, 
-						int16_t *output, int out_len)
+void resample_linear(int16_t *input, int in_len, int16_t *output, int out_len)
 {
 	if (0 == in_len || 0 == out_len)
 		return;

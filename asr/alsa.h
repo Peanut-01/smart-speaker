@@ -3,7 +3,7 @@
 
 #include <alsa/asoundlib.h>
 
-#define RECORD_DEVICE "hw:2,0"
+#define RECORD_DEVICE "hw:0,0"
 #define PLAYBACK_DEVICE "default"
 #define RATE 44100
 #define CHANNELS 1
