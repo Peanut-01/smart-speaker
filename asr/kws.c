@@ -95,7 +95,6 @@ int sherpa_kws(float *float_buffer, int resample_frams)
             ret = 1; // 设置 ret 为 1，表示唤醒词识别成功
 		}
 		SherpaOnnxDestroyKeywordResult(r);
-
 	}
 
 	return ret;
