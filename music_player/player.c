@@ -245,6 +245,9 @@ void child_process(char *name)
             arg[3] = "-quiet";
             arg[4] = "-input";
             arg[5] = "file=/home/fifo/cmd_fifo";
+            arg[6] = "-ao";
+            arg[7] = "alsa:device=hw=1.0";
+            arg[8] = NULL;
 
             if (execv("/usr/bin/mplayer", arg) == -1)
             {
