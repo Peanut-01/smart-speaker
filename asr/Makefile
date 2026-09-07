@@ -1,5 +1,5 @@
 Target=asr
-Object=alsa.o main.o sherpa.o
+Object=alsa.o main.o sherpa.o kws.o
 
 CFLAGS=-I/home/sherpa/sherpa-onnx-v1.12.1-linux-aarch64-jni/include/
 

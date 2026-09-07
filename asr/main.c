@@ -2,10 +2,20 @@
 #include <signal.h>
 #include "alsa.h"
 #include "sherpa.h"
+#include "kws.h"
 #include "sherpa-onnx/c-api/c-api.h"
 
 
+enum Appstate
+{
+    STATE_KWS,
+    STATE_ASR
+};
+
+
 int running = 1; // 控制主循环的运行状态
+enum Appstate cur_state = STATE_KWS; // 当前应用状态，初始为唤醒词识别
+
 extern snd_pcm_t *pcmp; // ALSA PCM设备句柄
 extern snd_pcm_uframes_t frams_per_buffer; // ALSA缓冲区帧数
 extern unsigned int target_rate; // 重采样后的采样率
@@ -65,6 +75,18 @@ int main()
     }
     printf("语音识别初始化成功\n");
 
+    // 初始化唤醒词识别
+    if (init_sherpa_kws() == -1)
+    {
+        printf("唤醒词识别初始化失败\n");
+        clean_up();
+        return -1;
+    }
+    printf("唤醒词识别初始化成功\n");
+
+    printf("\n\n=======关键词识别模式========\n");
+    printf("请说出关键词唤醒...\n");
+
     // 申请内存存放读取的音频数据
     int16_t *buffer = malloc(frams_per_buffer * CHANNELS * sizeof(int16_t));
 
@@ -117,32 +139,26 @@ int main()
         {
             // 归一化到[-1, 1]
             float_buffer[i] = resample_buffer[i] / 32768.0f;
-        }
+        }   
 
-        // 把数据提交到音频流
-        SherpaOnnxOnlineStreamAcceptWaveform(asr_stream, target_rate, float_buffer, resample_frames);
-        // 开始识别
-        while (SherpaOnnxIsOnlineStreamReady(asr_recognizer, asr_stream))
+        if (cur_state == STATE_ASR)
         {
-            SherpaOnnxDecodeOnlineStream(asr_recognizer, asr_stream);
-        }
-
-        // 读取数据
-        const SherpaOnnxOnlineRecognizerResult *r = SherpaOnnxGetOnlineStreamResult(asr_recognizer, asr_stream);
-
-        // 端点检测
-        if (SherpaOnnxOnlineStreamIsEndpoint(asr_recognizer, asr_stream))
-        {
-            if (r && r->text && strlen(r->text) > 0)
+            if (sherpa_asr(float_buffer, resample_frames))
             {
-                printf("识别结果---> %s\n", r->text);
-                // 清空音频流数据
-                SherpaOnnxOnlineStreamReset(asr_recognizer, asr_stream);
+                cur_state = STATE_KWS;
+                printf("\n=======关键词识别模式========\n");
+                printf("请说出关键词唤醒...\n");
             }
         }
-
-        // 清空结果
-        SherpaOnnxDestroyOnlineRecognizerResult(r);
+        else if (cur_state == STATE_KWS)
+        {
+            if (sherpa_kws(float_buffer, resample_frames))
+            {
+                cur_state = STATE_ASR;
+                printf("\n=======语音识别模式========\n");
+                printf("请说话...\n");
+            }
+        }
 
         free(resample_buffer); // 释放重采样缓冲区
         free(float_buffer); // 释放浮点数缓冲区

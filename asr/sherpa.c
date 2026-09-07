@@ -58,46 +58,46 @@ int init_sherpa_asr()
     return 0;
 }
 
-// int sherap_asr(float *float_buffer, int resample_frams)
-// {
-// 	int ret = 0;
 
-// 	//把数据提交到音频流
-// 	//哪个音频流 采样频率 数据地址 数据长度
-// 	SherpaOnnxOnlineStreamAcceptWaveform(asr_stream, target_rate, float_buffer, resample_frams);
+int sherpa_asr(float *float_buffer, int resample_frams)
+{
+	int ret = 0;
 
-// 	//开始识别
-// 	while (SherpaOnnxIsOnlineStreamReady(asr_recognizer, asr_stream)) 
-// 	{
-//       	SherpaOnnxDecodeOnlineStream(asr_recognizer, asr_stream);
-//     }
+	//把数据提交到音频流
+	//哪个音频流 采样频率 数据地址 数据长度
+	SherpaOnnxOnlineStreamAcceptWaveform(asr_stream, target_rate, float_buffer, resample_frams);
 
-// 	//读取数据
-// 	const SherpaOnnxOnlineRecognizerResult *r =
-//        SherpaOnnxGetOnlineStreamResult(asr_recognizer, asr_stream);
+	//开始识别
+	while (SherpaOnnxIsOnlineStreamReady(asr_recognizer, asr_stream)) 
+	{
+      	SherpaOnnxDecodeOnlineStream(asr_recognizer, asr_stream);
+    }
 
-// 	//端点检测
-// 	if (SherpaOnnxOnlineStreamIsEndpoint(asr_recognizer, asr_stream))
-// 	{
-// 		if (r && r->text && strlen(r->text) > 0)
-// 		{
-// 			printf("---> %s\n", r->text);
+	//读取数据
+	const SherpaOnnxOnlineRecognizerResult *r = SherpaOnnxGetOnlineStreamResult(asr_recognizer, asr_stream);
 
-// 			//把数据写入管道
-// 			if (write(asr_fd, r->text, strlen(r->text)) == -1)
-// 			{
-// 				perror("write fifo");
-// 			}
+	//端点检测
+	if (SherpaOnnxOnlineStreamIsEndpoint(asr_recognizer, asr_stream))
+	{
+		if (r && r->text && strlen(r->text) > 0)
+		{
+			printf("---> %s\n", r->text);
 
-// 			//清空音频流数据
-// 			SherpaOnnxOnlineStreamReset(asr_recognizer, asr_stream);
+			// //把数据写入管道
+			// if (write(asr_fd, r->text, strlen(r->text)) == -1)
+			// {
+			// 	perror("write fifo");
+			// }
 
-// 			ret = 1;
-// 		}
-// 	}
+			//清空音频流数据
+			SherpaOnnxOnlineStreamReset(asr_recognizer, asr_stream);
 
-// 	//清空结果
-// 	SherpaOnnxDestroyOnlineRecognizerResult(r);
+			ret = 1;
+		}
+	}
 
-// 	return ret;
-// }
+	//清空结果
+	SherpaOnnxDestroyOnlineRecognizerResult(r);
+
+	return ret;
+}
