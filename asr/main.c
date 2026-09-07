@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <signal.h>
 #include "alsa.h"
 #include "sherpa.h"
 #include "sherpa-onnx/c-api/c-api.h"
@@ -13,12 +14,44 @@ extern const SherpaOnnxOnlineStream *asr_stream; // Sherpa ASR音频流
 extern const SherpaOnnxOnlineRecognizer *asr_recognizer; // Sherpa ASR识别器
 
 
+void quit_handler(int sig)
+{
+    running = 0;
+    printf("退出程序...\n");
+}
+
+
+void clean_up()
+{
+    // 关闭PCM设备
+    if (pcmp)
+    {
+        snd_pcm_close(pcmp);
+        pcmp = NULL;
+    }
+
+    // 销毁Sherpa ASR识别器和音频流
+    if (asr_stream)
+    {
+        SherpaOnnxDestroyOnlineStream(asr_stream);
+    }
+    if (asr_recognizer)
+    {
+        SherpaOnnxDestroyOnlineRecognizer(asr_recognizer);
+    }
+}
+
+
 int main()
 {
+    // 信号处理函数
+    signal(SIGINT, quit_handler);
+
     // 初始化
     if (init_alsa() == -1)
     {
         printf("ALSA初始化失败\n");
+        clean_up();
         return -1;
     }
     printf("ALSA初始化成功\n");
@@ -27,12 +60,20 @@ int main()
     if (init_sherpa_asr() == -1)
     {
         printf("语音识别初始化失败\n");
+        clean_up();
         return -1;
     }
     printf("语音识别初始化成功\n");
 
     // 申请内存存放读取的音频数据
     int16_t *buffer = malloc(frams_per_buffer * CHANNELS * sizeof(int16_t));
+
+    if (buffer == NULL)
+    {
+        fprintf(stderr, "buffer内存分配失败\n");
+        clean_up();
+        return -1;
+    }
 
     while (running)
     {
@@ -57,7 +98,7 @@ int main()
         if (resample_buffer == NULL)
         {
             fprintf(stderr, "resample_buffer 内存分配失败\n");
-            return -1;
+            break;
         }
 
         resample_linear(buffer, frames_read, resample_buffer, resample_frames);
@@ -67,7 +108,8 @@ int main()
         if (float_buffer == NULL)
         {
             fprintf(stderr, "float_buffer内存分配失败\n");
-            return -1;
+            free(resample_buffer);
+            break;
         }
 
         // 转换成浮点数并且归一化
@@ -104,9 +146,13 @@ int main()
 
         free(resample_buffer); // 释放重采样缓冲区
         free(float_buffer); // 释放浮点数缓冲区
+
+        usleep(1000);
     }
     
     free(buffer); // 释放原始缓冲区
+
+    clean_up(); // 清理资源
 
     return 0;
 }

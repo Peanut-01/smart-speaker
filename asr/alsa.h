@@ -10,4 +10,5 @@
 
 int init_alsa();
 void resample_linear(int16_t *input, int in_len, int16_t *output, int out_len);
+
 #endif // _ALSA_H
