@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <signal.h>
+#include <fcntl.h>
 #include "alsa.h"
 #include "sherpa.h"
 #include "kws.h"
@@ -15,6 +16,7 @@ enum Appstate
 
 int running = 1; // 控制主循环的运行状态
 enum Appstate cur_state = STATE_KWS; // 当前应用状态，初始为唤醒词识别
+int asr_fd; // 用于与ASR进程通信的文件描述符
 
 extern snd_pcm_t *pcmp; // ALSA PCM设备句柄
 extern snd_pcm_uframes_t frams_per_buffer; // ALSA缓冲区帧数
@@ -83,6 +85,15 @@ int main()
         return -1;
     }
     printf("唤醒词识别初始化成功\n");
+
+    // 打开管道
+    asr_fd = open("/home/fifo/asr_fifo", O_WRONLY);
+    if (asr_fd == -1)
+    {
+        fprintf(stderr, "open fifo error\n");
+        clean_up();
+        return -1;
+    }
 
     printf("\n\n=======关键词识别模式========\n");
     printf("请说出关键词唤醒...\n");

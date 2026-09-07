@@ -15,6 +15,7 @@ fd_set READSET;
 extern int g_maxfd;
 extern int g_sockfd;
 extern int g_buttonfd;
+extern int g_asrfd;
 extern pthread_t tid;
 
 
@@ -68,10 +69,10 @@ void select_read_stdio()
         player_prior_play();
         break;
     case '7':
-        player_volumn_up();
+        player_volume_up();
         break;
     case '8':
-        player_volumn_down();
+        player_volume_down();
         break;
     case '9':
         player_set_mode(CIRCLE);
@@ -143,11 +144,11 @@ void select_read_socket()
     }
     else if (!strcmp(cmd, "app_voice_up"))
     {
-        socket_volumn_up();
+        socket_volume_up();
     }
     else if (!strcmp(cmd, "app_voice_down"))
     {
-        socket_volumn_down();
+        socket_volume_down();
     }
     else if (!strcmp(cmd, "app_circle"))
     {
@@ -167,6 +168,73 @@ void select_read_socket()
 void select_read_button()
 {
     device_read_button();
+}
+
+
+void select_read_fifo()
+{
+    char buf[256] = {0};
+
+    size_t ret = read(g_asrfd, buf, sizeof(buf));
+    if (-1 == ret)
+    {
+        perror("read fifo");
+        return;
+    }
+    else if (0 == ret)
+    {
+        // 管道另一端被关闭
+        printf("管道异常结束\n");
+        FD_CLR(g_asrfd, &READSET);
+        g_maxfd = (g_asrfd == g_maxfd) ? (g_asrfd - 1) : g_maxfd;
+        return;
+    }
+    
+    if (strstr(buf, "我想听歌") || (strstr(buf, "首") && strstr(buf, "听听")))
+    {
+        player_start_play();
+    }
+    else if (strstr(buf, "暂停") || strstr(buf, "停一下"))
+	{
+		player_suspend_play();
+	}
+	else if (strstr(buf, "继续"))
+	{
+		player_continue_play();
+	}
+	else if (strstr(buf, "下一首") || strstr(buf, "换一首"))
+	{
+		player_next_play();
+	}
+	else if (strstr(buf, "上一首") || (strstr(buf, "刚才") && strstr(buf, "歌")))
+	{
+		player_prior_play();
+	}
+	else if ((strstr(buf, "声音") || strstr(buf, "音量")) && strstr(buf, "大"))
+	{
+		player_volume_up();
+
+		//player_continue_play();
+	}
+	else if ((strstr(buf, "声音") || strstr(buf, "音量")) && strstr(buf, "小"))
+	{
+		player_volume_down();
+
+		//player_continue_play();
+	}
+	else if (strstr(buf, "单曲循环"))
+	{
+		player_set_mode(CIRCLE);
+
+		//player_continue_play();
+	}
+	else if (strstr(buf, "顺序播放"))
+	{
+		player_set_mode(SEQUENCE);
+
+		//player_continue_play();
+	}
+    
 }
 
 
@@ -202,5 +270,10 @@ void m_select()
         {
             select_read_button();
         }
+        else if (FD_ISSET(g_asrfd, &TMPSET))   // 语音识别管道可读
+        {
+            select_read_fifo();
+        }
+        
     }
 }

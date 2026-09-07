@@ -1,11 +1,8 @@
 #include <stdio.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#include "player.h"
+#include <sys/select.h>
 #include <string.h>
-#include "link.h"
-#include "socket.h"
-#include "device.h"
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -15,6 +12,10 @@
 #include <fcntl.h>
 #include <fcntl.h>
 #include <sys/sem.h>
+#include "player.h"
+#include "link.h"
+#include "socket.h"
+#include "device.h"
 
 
 int g_shmid = 0;        // 共享内存id
@@ -22,9 +23,11 @@ int g_semid = 0;        // 信号量标识
 int g_start_flag = 0;   // 是否开始  0-未开始; 1-开始
 int g_suspend_flag = 0; // 是否暂停  0-未暂停; 1-暂停
 int g_device_mode = ONLINE_MODE; //在线模式
+int g_asrfd = 0; // 语音识别管道的文件描述符
 
 extern Node *g_music_head;
-
+extern fd_set READSET;
+extern int g_maxfd;
 
 int init_shm()
 {
@@ -432,7 +435,7 @@ void player_prior_play()
 
 
 // 增加音量，增加10%
-void player_volumn_up()
+void player_volume_up()
 {
     int volume;
     device_get_volume(&volume);
@@ -452,7 +455,7 @@ void player_volumn_up()
 
 
 // 降低音量，降低10%
-void player_volumn_down()
+void player_volume_down()
 {
     int volume;
     device_get_volume(&volume);
@@ -481,4 +484,23 @@ void player_set_mode(int mode)
     parent_set_shm(&s);
     player_sem_v();
     printf("------修改播放模式成功------\n");
+}
+
+
+// 初始化语音识别管道
+int init_asr_fifo()
+{
+    g_asrfd = open("/home/fifo/asr_fifo", O_RDONLY);
+
+    if (-1 == g_asrfd)
+    {
+        perror("OPEN ASR FIFO");
+        return -1;
+    }
+
+    // 添加到集合中
+    FD_SET(g_asrfd, &READSET);
+    g_maxfd = g_asrfd > g_maxfd ? g_asrfd : g_maxfd;
+
+    return 0;
 }

@@ -77,6 +77,13 @@ int main()
 
     //link_traverse_list();
     
+    if (init_asr_fifo() == -1)
+    {
+        printf("asr fifo 初始化失败\n");
+        return -1;
+    }
+    printf("asr fifo 初始化成功\n");
+
     // 循环监听
     m_select();
 

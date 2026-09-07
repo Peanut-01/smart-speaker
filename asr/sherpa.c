@@ -63,33 +63,32 @@ int sherpa_asr(float *float_buffer, int resample_frams)
 {
 	int ret = 0;
 
-	//把数据提交到音频流
-	//哪个音频流 采样频率 数据地址 数据长度
+	// 把数据提交到音频流
+	// 哪个音频流 采样频率 数据地址 数据长度
 	SherpaOnnxOnlineStreamAcceptWaveform(asr_stream, target_rate, float_buffer, resample_frams);
-
-	//开始识别
+	// 开始识别
 	while (SherpaOnnxIsOnlineStreamReady(asr_recognizer, asr_stream)) 
 	{
       	SherpaOnnxDecodeOnlineStream(asr_recognizer, asr_stream);
     }
 
-	//读取数据
+	// 读取数据
 	const SherpaOnnxOnlineRecognizerResult *r = SherpaOnnxGetOnlineStreamResult(asr_recognizer, asr_stream);
 
-	//端点检测
+	// 端点检测
 	if (SherpaOnnxOnlineStreamIsEndpoint(asr_recognizer, asr_stream))
 	{
 		if (r && r->text && strlen(r->text) > 0)
 		{
 			printf("---> %s\n", r->text);
 
-			// //把数据写入管道
-			// if (write(asr_fd, r->text, strlen(r->text)) == -1)
-			// {
-			// 	perror("write fifo");
-			// }
+			// 把数据写入管道
+			if (write(asr_fd, r->text, strlen(r->text)) == -1)
+			{
+				perror("write fifo");
+			}
 
-			//清空音频流数据
+			// 清空音频流数据
 			SherpaOnnxOnlineStreamReset(asr_recognizer, asr_stream);
 
 			ret = 1;

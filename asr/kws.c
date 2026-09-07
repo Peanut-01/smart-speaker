@@ -72,10 +72,10 @@ int sherpa_kws(float *float_buffer, int resample_frams)
 
 			// if (device_mode == ONLINE_MODE && !strcmp(r->keyword, "你好小胖"))
 			// {
-			// 	if (write(asr_fd, r->keyword, strlen(r->keyword)) == -1)
-			// 	{
-			// 		perror("write fifo");
-			// 	}
+            if (write(asr_fd, r->keyword, strlen(r->keyword)) == -1)
+            {
+                perror("write fifo");
+            }
 
 			// 	ret = 1;
 			// }

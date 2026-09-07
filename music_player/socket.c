@@ -102,7 +102,7 @@ void *send_server(void *arg)
         // 获取当前音量，并封装到json中
         int volume;
         device_get_volume(&volume);
-        json_object_object_add(obj, "volumn", json_object_new_int(volume));
+        json_object_object_add(obj, "volume", json_object_new_int(volume));
 
         // 发送数据给服务器
         socket_send_data(obj);
@@ -379,7 +379,7 @@ void socket_prior_play()
 
 
 // 增加音量
-void socket_volumn_up()
+void socket_volume_up()
 {
     struct json_object *obj = json_object_new_object();
     json_object_object_add(obj, "cmd", json_object_new_string("app_voice_up_reply"));
@@ -396,7 +396,7 @@ void socket_volumn_up()
         return;
     }
     // 调整音量
-    player_volumn_up();
+    player_volume_up();
     // 再次获取
     int new;
     device_get_volume(&new);
@@ -419,7 +419,7 @@ void socket_volumn_up()
 
 
 // 降低音量
-void socket_volumn_down()
+void socket_volume_down()
 {
     struct json_object *obj = json_object_new_object();
     json_object_object_add(obj, "cmd", json_object_new_string("app_voice_down_reply"));
@@ -436,7 +436,7 @@ void socket_volumn_down()
         return;
     }
     // 调整音量
-    player_volumn_down();
+    player_volume_down();
     // 再次获取
     int new;
     device_get_volume(&new);

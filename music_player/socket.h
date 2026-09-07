@@ -13,8 +13,8 @@ void socket_suspend_play();
 void socket_continue_play();
 void socket_next_play();
 void socket_prior_play();
-void socket_volumn_up();
-void socket_volumn_down();
+void socket_volume_up();
+void socket_volume_down();
 void socket_set_mode(int mode);
 
 #endif // _SOCKET_H

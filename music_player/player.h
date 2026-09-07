@@ -52,11 +52,12 @@ void player_continue_play();
 void player_suspend_play();
 void player_next_play();
 void player_prior_play(); 
-void player_volumn_up();
-void player_volumn_down();
+void player_volume_up();
+void player_volume_down();
 void player_set_mode(int mode);
 void player_sem_p();
 void player_sem_v();
+int init_asr_fifo();
         
 
 #endif // _PLAYER_H
