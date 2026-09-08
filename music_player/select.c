@@ -189,8 +189,13 @@ void select_read_fifo()
         g_maxfd = (g_asrfd == g_maxfd) ? (g_asrfd - 1) : g_maxfd;
         return;
     }
-    
-    if (strstr(buf, "我想听歌") || (strstr(buf, "首") && strstr(buf, "听听")))
+
+    if (strstr(buf, "你好小胖")) 
+    {
+        player_suspend_play();
+        // 回应用户
+    }
+    else if (strstr(buf, "我想听歌") || (strstr(buf, "首") && strstr(buf, "听听")))
     {
         player_start_play();
     }
@@ -214,26 +219,50 @@ void select_read_fifo()
 	{
 		player_volume_up();
 
-		//player_continue_play();
+		player_continue_play();
 	}
 	else if ((strstr(buf, "声音") || strstr(buf, "音量")) && strstr(buf, "小"))
 	{
 		player_volume_down();
 
-		//player_continue_play();
+		player_continue_play();
 	}
 	else if (strstr(buf, "单曲循环"))
 	{
 		player_set_mode(CIRCLE);
 
-		//player_continue_play();
+		player_continue_play();
 	}
 	else if (strstr(buf, "顺序播放"))
 	{
 		player_set_mode(SEQUENCE);
 
-		//player_continue_play();
+		player_continue_play();
 	}
+    else if (strstr(buf, "周杰伦"))
+    {
+        player_singer_play("周杰伦");
+
+    }
+    else if (strstr(buf, "五月天"))
+    {
+        player_singer_play("五月天");
+
+    }
+    else if (strstr(buf, "陈奕迅"))
+    {
+        player_singer_play("陈奕迅");
+
+    }
+    else if (strstr(buf, "许嵩"))
+    {
+        player_singer_play("许嵩");
+
+    }
+    else if (strstr(buf, "不想听了"))
+    {
+        player_stop_play();
+    }
     
 }
 

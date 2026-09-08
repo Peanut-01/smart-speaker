@@ -58,6 +58,7 @@ void player_set_mode(int mode);
 void player_sem_p();
 void player_sem_v();
 int init_asr_fifo();
+void player_singer_play(const char *name);
         
 
 #endif // _PLAYER_H

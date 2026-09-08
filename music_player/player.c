@@ -507,3 +507,17 @@ int init_asr_fifo()
 
     return 0;
 }
+
+
+// 根据歌手播放音乐
+void player_singer_play(const char *name)
+{
+    // 结束播放
+    player_stop_play();
+    // 清空链表
+    link_clear_list();
+    // 请求新的歌曲
+    socket_get_music(name);
+    // 开始播放
+    player_start_play();
+}
