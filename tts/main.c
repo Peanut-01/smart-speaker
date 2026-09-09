@@ -2,6 +2,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <alsa/asoundlib.h>
+#include <signal.h>
+#include <stdlib.h>
 #include "tts.h"
 #include "alsa.h"
 #include "sherpa-onnx/c-api/c-api.h"
@@ -14,11 +16,43 @@ extern const SherpaOnnxOfflineTts *tts;
 extern snd_pcm_t *pcmp;
 
 
+void clean_up()
+{
+    if (pcmp)
+    {
+        snd_pcm_close(pcmp);
+    }
+
+    if (tts)
+    {
+        SherpaOnnxDestroyOfflineTts(tts);
+    }
+
+    if (tts_fd > 0)
+    {
+        close(tts_fd);
+    }
+
+    exit(0);
+}
+
+
+void quit_handler(int sig)
+{
+    printf("程序准备退出...\n");
+    running = 0;
+    clean_up();
+}
+
+
 int main()
 {
+    signal(SIGINT, quit_handler);
+
     if (init_sherpa_tts() == -1)
     {
         printf("tts 初始化失败\n");
+        clean_up();
         return -1;
     }
     printf("tts 初始化成功\n");
@@ -26,6 +60,7 @@ int main()
     if (init_alsa_playback() == -1)
     {
         printf("alsa 初始化失败\n");
+        clean_up();
         return -1;
     }
     printf("alsa 初始化成功\n");
@@ -35,6 +70,7 @@ int main()
     if (-1 == tts_fd)
     {
         perror("open fifo");
+        clean_up();
         return -1;
     }
 
