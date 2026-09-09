@@ -23,7 +23,8 @@ int g_semid = 0;        // 信号量标识
 int g_start_flag = 0;   // 是否开始  0-未开始; 1-开始
 int g_suspend_flag = 0; // 是否暂停  0-未暂停; 1-暂停
 int g_device_mode = ONLINE_MODE; //在线模式
-int g_asrfd = 0; // 语音识别管道的文件描述符
+int g_asrfd = 0;  // 语音识别管道的文件描述符
+int g_ttsfd = 0;  // 用于语音合成的管道
 
 extern Node *g_music_head;
 extern fd_set READSET;
@@ -238,7 +239,7 @@ void child_process(char *name)
 
             strcat(music_path, name);
 
-            char *arg[7] = {0};
+            char *arg[9] = {0};
             arg[0] = "mplayer";
             arg[1] = music_path;
             arg[2] = "-slave";
@@ -490,20 +491,26 @@ void player_set_mode(int mode)
 }
 
 
-// 初始化语音识别管道
-int init_asr_fifo()
+// 初始化管道
+int init_fifo()
 {
     g_asrfd = open("/home/fifo/asr_fifo", O_RDONLY);
-
     if (-1 == g_asrfd)
     {
-        perror("OPEN ASR FIFO");
+        perror("open asr_fifo");
         return -1;
     }
 
-    // 添加到集合中
+	//添加到集合中
     FD_SET(g_asrfd, &READSET);
-    g_maxfd = g_asrfd > g_maxfd ? g_asrfd : g_maxfd;
+    g_maxfd = (g_maxfd < g_asrfd) ? g_asrfd : g_maxfd;
+
+    g_ttsfd = open("/home/fifo/tts_fifo", O_WRONLY);
+    if (-1 == g_ttsfd)
+    {
+        perror("open tts_fifo");
+        return -1;
+    }
 
     return 0;
 }
@@ -520,4 +527,13 @@ void player_singer_play(const char *name)
     socket_get_music(name);
     // 开始播放
     player_start_play();
+}
+
+
+void player_tts(const char* msg)
+{
+    if (write(g_ttsfd, msg, strlen(msg)) == -1)
+    {
+        perror("write fifo");
+    }
 }

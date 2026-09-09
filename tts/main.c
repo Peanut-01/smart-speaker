@@ -1,11 +1,17 @@
 #include <stdio.h>
-#include "sherpa-onnx/c-api/c-api.h"
+#include <fcntl.h>
+#include <unistd.h>
+#include <alsa/asoundlib.h>
 #include "tts.h"
 #include "alsa.h"
+#include "sherpa-onnx/c-api/c-api.h"
 
 
 int running = 1;
+int tts_fd = 0;
+
 extern const SherpaOnnxOfflineTts *tts;
+extern snd_pcm_t *pcmp;
 
 
 int main()
@@ -24,15 +30,38 @@ int main()
     }
     printf("alsa 初始化成功\n");
 
-    const char *s = "今天天气不错";
+    // 打开管道
+    tts_fd = open("/home/fifo/tts_fifo", O_RDONLY);
+    if (-1 == tts_fd)
+    {
+        perror("open fifo");
+        return -1;
+    }
+
+    char buf[1024] = {0};
+
     while (running)
     {
-        //tts实例 需要合成的文本 说话的声音 语速 用于播放的回调函数
-		SherpaOnnxOfflineTtsGenerateWithCallback(tts, s, 1, 1.0, play_callback);
-        while (1)
+        // 读取管道数据
+        size_t size = read(tts_fd, buf, sizeof(buf));
+        if (-1 == size)
         {
-            /* code */
+            perror("read");
+            continue;
         }
+        else if (0 == size)
+        {
+            sleep(1);
+            continue;
+        }
+
+        snd_pcm_prepare(pcmp);  // PREPARED状态
+        
+        // tts实例 需要合成的文本 说话的声音 语速 用于播放的回调函数
+		SherpaOnnxOfflineTtsGenerateWithCallback(tts, buf, 1, 1.0, play_callback);
+
+        // 等待缓冲区数据播放完成
+        snd_pcm_drain(pcmp);    // SETUP状态
         
     }
     

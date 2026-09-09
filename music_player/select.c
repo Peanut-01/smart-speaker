@@ -194,6 +194,7 @@ void select_read_fifo()
     {
         player_suspend_play();
         // 回应用户
+        player_tts("宝贝我在");
     }
     else if (strstr(buf, "我想听歌") || (strstr(buf, "首") && strstr(buf, "听听")))
     {

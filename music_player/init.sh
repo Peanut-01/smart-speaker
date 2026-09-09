@@ -18,3 +18,4 @@ mkdir -p /home/fifo
 
 mkfifo /home/fifo/cmd_fifo
 mkfifo /home/fifo/asr_fifo
+mkfifo /home/fifo/tts_fifo

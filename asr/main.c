@@ -168,6 +168,10 @@ int main()
                 cur_state = STATE_ASR;
                 printf("\n=======语音识别模式========\n");
                 printf("请说话...\n");
+
+                sleep(2);
+                snd_pcm_drop(pcmp);  // 清空缓冲区 变成SETUP状态
+                snd_pcm_prepare(pcmp);
             }
         }
 

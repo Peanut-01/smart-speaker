@@ -57,8 +57,9 @@ void player_volume_down();
 void player_set_mode(int mode);
 void player_sem_p();
 void player_sem_v();
-int init_asr_fifo();
+int init_fifo();
 void player_singer_play(const char *name);
+void player_tts(const char* msg);
         
 
 #endif // _PLAYER_H
