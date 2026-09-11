@@ -16,5 +16,6 @@ void socket_prior_play();
 void socket_volume_up();
 void socket_volume_down();
 void socket_set_mode(int mode);
+void socket_upload_music();
 
 #endif // _SOCKET_H

@@ -2,18 +2,18 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
+#include <json/json.h>
 #include <string.h>
-#include "socket.h"
+#include <sys/ipc.h>
+#include <sys/shm.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sys/select.h>
 #include <pthread.h>
 #include "player.h"
-#include <sys/ipc.h>
-#include <sys/shm.h>
+#include "socket.h"
 #include "main.h"
-#include <json/json.h>
 #include "device.h"
 #include "link.h"
 
@@ -26,6 +26,7 @@ extern fd_set READSET;
 extern int g_start_flag;
 extern int g_suspend_flag;
 extern int g_device_mode;
+extern Node *g_music_head;
 
 
 void socket_update_music(int sig)
@@ -43,6 +44,9 @@ void socket_update_music(int sig)
     socket_get_music(s.cur_singer);
 
     player_start_play();
+
+    // 通知APP歌曲列表已经更新
+    socket_upload_music();
 }
 
 
@@ -501,5 +505,33 @@ void socket_set_mode(int mode)
     
     // 返回结果
     socket_send_data(obj);
+    json_object_put(obj);
+}
+
+
+// 上传音乐列表
+void socket_upload_music()
+{
+    struct json_object *obj = json_object_new_object();
+
+    json_object_object_add(obj, "cmd", json_object_new_string("upload_music"));
+
+    // 创建json数组对象
+    struct json_object *arr = json_object_new_array();
+
+    // 遍历音乐链表，将每首音乐的信息添加到数组中
+    Node *p = g_music_head->next;
+    while (p != NULL)
+    {
+        json_object_array_add(arr, json_object_new_string(p->music_name));
+        p = p->next;
+    }
+    
+    json_object_object_add(obj, "music", arr);
+
+    // 发送数据给服务器
+    socket_send_data(obj);
+
+    json_object_put(arr);
     json_object_put(obj);
 }

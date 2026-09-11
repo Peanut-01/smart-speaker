@@ -158,6 +158,10 @@ void select_read_socket()
     {
         socket_set_mode(SEQUENCE);
     }
+    else if (!strcmp(cmd, "app_get_music"))
+    {
+        socket_upload_music();
+    }
     else
     {
         printf("不匹配");

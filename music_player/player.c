@@ -358,6 +358,8 @@ void player_next_play()
             socket_get_music(s.cur_singer);
             // 开始播放
             player_start_play();
+            // 通知APP歌曲列表已经更新
+            socket_upload_music();
 
             return;
         }
@@ -527,6 +529,8 @@ void player_singer_play(const char *name)
     socket_get_music(name);
     // 开始播放
     player_start_play();
+    // 通知APP歌曲列表已经更新
+    socket_upload_music();
 }
 
 
