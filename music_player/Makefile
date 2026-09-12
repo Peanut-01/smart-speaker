@@ -9,8 +9,13 @@ LIBS = -ljson -lasound
 
 CC=gcc
 
+all: $(Target) testserver
+
 $(Target):$(Object)
 	$(CC) $(Object) -o $(Target) $(CFLAGS) $(LIBS)
+
+testserver: testserver.o
+	$(CC) testserver.o -o testserver -lpthread -ljson $(CFLAGS)
 
 clean:
 	rm -f *.o main

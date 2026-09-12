@@ -268,6 +268,15 @@ void select_read_fifo()
     {
         player_stop_play();
     }
+    else    // 聊天（和AI聊天）
+    {
+        char cmd[1024] = {0};
+
+        sprintf(cmd, "/home/qwen/qwen.sh %s 2>/dev/null", buf);
+
+        system(cmd);    // 阻塞函数
+
+    }
     
 }
 
@@ -308,6 +317,5 @@ void m_select()
         {
             select_read_fifo();
         }
-        
     }
 }

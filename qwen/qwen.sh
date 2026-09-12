@@ -9,7 +9,7 @@ user_message=$1
 
 
 curl -X POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions \
--H "Authorization: Bearer sk-ws-H.PDXHEEX.zgaQ.MEYCIQDfqrfwrgleH3N8tXVvmYCyF0XAEjau028QiXUeUyO-ZwIhAMPJddIqBxmgRzblNmtDe-XLQaGU10AhE-V7mHe-3CZk" \
+-H "Authorization: Bearer sk-ws-H.PDXHEEX.R6nW.MEUCIQCzlNgk_eWgT5pSfNNkB7b1b6AmJB_SKfmf_Hptw2zUswIgEWKAXfWC-uifPz06zpxKwEUCUjjcghVXorwLILkadvk" \
 -H "Content-Type: application/json" \
 -d '{
   "enable_thinking": false,

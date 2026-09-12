@@ -98,6 +98,8 @@ int main()
 
         // 等待缓冲区数据播放完成
         snd_pcm_drain(pcmp);    // SETUP状态
+
+        memset(buf, 0, sizeof(buf));
         
     }
     

@@ -175,7 +175,7 @@ int main()
 
     while (1)
     {
-        /* code */
+        sleep(1);
     }
 
     close(fd);

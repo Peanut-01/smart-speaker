@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <json/json.h>
 #include <stdlib.h>
+#include <fcntl.h>
 
 
 void parse_json(const char *json, char *content)
@@ -40,11 +41,6 @@ void parse_json(const char *json, char *content)
     strcpy(content, json_object_get_string(content_obj));
 
     json_object_put(obj);
-
-    if (strlen(content) > 0)
-    {
-        printf("--> %s\n", content);
-    }
 }
 
 
@@ -69,12 +65,32 @@ int main(int argc, char *argv[])
 
     char buf[2048] = {0};
     fgets(buf, sizeof(buf), fp);
-    printf("--> %s\n", buf);
+    
+    //printf("--> %s\n", buf);
 
     pclose(fp);
 
     char content[1024] = {0};
     parse_json(buf, content);
+
+    if (strlen(content) > 0)
+    {
+        printf("--> %s\n", content);
+
+        // 打开管道
+        int tts_fd = open("/home/fifo/tts_fifo", O_WRONLY);
+        if (tts_fd == -1)
+        {
+            perror("open");
+            return -1;
+        }
+        // 写入管道
+        if (write(tts_fd, content, strlen(content)) == -1)
+        {
+            perror("write");
+        }
+        close(tts_fd);
+    }
 
     return 0;
 }
