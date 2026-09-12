@@ -541,3 +541,26 @@ void player_tts(const char* msg)
         perror("write fifo");
     }
 }
+
+
+void player_stop_tts()
+{
+    // 获取tts进程号
+    FILE *fp = popen("pgrep tts", "r");
+
+    if (NULL == fp)
+    {
+        perror("popen");
+        return;
+    }
+
+    char buf[32] = {0};
+    fgets(buf, sizeof(buf), fp);
+
+    pid_t tts_pid = atoi(buf);
+
+    pclose(fp);
+
+    // 发送信号结束tts进程
+    kill(tts_pid, SIGUSR1);
+}

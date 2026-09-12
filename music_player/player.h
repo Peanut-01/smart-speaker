@@ -60,6 +60,7 @@ void player_sem_v();
 int init_fifo();
 void player_singer_play(const char *name);
 void player_tts(const char* msg);
+void player_stop_tts();
         
 
 #endif // _PLAYER_H

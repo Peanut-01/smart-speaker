@@ -196,9 +196,12 @@ void select_read_fifo()
 
     if (strstr(buf, "你好小胖")) 
     {
+        // 暂停音乐
         player_suspend_play();
+        // 结束正在合成的语音
+        player_stop_tts();
         // 回应用户
-        player_tts("宝贝我在");
+        player_tts("我在");
     }
     else if (strstr(buf, "我想听歌") || (strstr(buf, "首") && strstr(buf, "听听")))
     {

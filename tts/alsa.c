@@ -4,7 +4,7 @@
 
 
 snd_pcm_t *pcmp;
-int play_flag = 1;    // 1表示合成 0表示不合成
+int play_flag = 1;    // 1表示继续语音合成 0表示停止合成
 
 extern int32_t target_rate;
 

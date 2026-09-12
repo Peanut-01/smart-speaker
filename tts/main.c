@@ -14,6 +14,7 @@ int tts_fd = 0;
 
 extern const SherpaOnnxOfflineTts *tts;
 extern snd_pcm_t *pcmp;
+extern int play_flag;
 
 
 void clean_up()
@@ -37,6 +38,7 @@ void clean_up()
 }
 
 
+// 退出程序
 void quit_handler(int sig)
 {
     printf("程序准备退出...\n");
@@ -45,9 +47,19 @@ void quit_handler(int sig)
 }
 
 
+// 结束语音合成
+void stop_handler(int sig)
+{
+    play_flag = 0;
+    // 清空缓冲区数据
+    snd_pcm_drop(pcmp);
+}
+
+
 int main()
 {
     signal(SIGINT, quit_handler);
+    signal(SIGUSR1, stop_handler);  // 结束语音合成
 
     if (init_sherpa_tts() == -1)
     {
@@ -91,6 +103,8 @@ int main()
             continue;
         }
 
+        play_flag = 1;    // 允许语音合成
+        
         snd_pcm_prepare(pcmp);  // PREPARED状态
         
         // tts实例 需要合成的文本 说话的声音 语速 用于播放的回调函数
