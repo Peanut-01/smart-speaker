@@ -1,27 +1,36 @@
 #!/bin/bash
+set -euo pipefail
 
-if [ $# -eq 0 ]; then
-    echo "请加上你的问题"
+# 在这里填写自己的 DeepSeek API Key
+API_KEY='sk-0376c7efe52e496db086d15246bc8cce'
+
+if [ "$#" -ne 1 ]; then
+    echo "请传入一个问题参数" >&2
     exit 1
 fi
 
-user_message=$1
+system_prompt='你是一个智能音箱助手，回复非常简洁、口语化，适合直接念出来。请遵守以下规则：1.每次回复尽量控制在1-2句话内。2.除了逗号和句号，不要用其他标点符号。3.不要列举项目符号。4.直接回答问题，不要复述用户问题。5.语气亲切自然，像朋友聊天一样。'
 
+payload=$(jq -n \
+    --arg system "$system_prompt" \
+    --arg question "$1" \
+    '{
+        model: "deepseek-flash",
+        messages: [
+            {role: "system", content: $system},
+            {role: "user", content: $question}
+        ],
+        thinking: {type: "disabled"},
+        reasoning_effort: "none",
+        max_tokens: 256,
+        response_format: {type: "text"},
+        stream: false
+    }')
 
-curl -X POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions \
--H "Authorization: Bearer sk-ws-H.PDXHEEX.R6nW.MEUCIQCzlNgk_eWgT5pSfNNkB7b1b6AmJB_SKfmf_Hptw2zUswIgEWKAXfWC-uifPz06zpxKwEUCUjjcghVXorwLILkadvk" \
--H "Content-Type: application/json" \
--d '{
-  "enable_thinking": false,
-  "model": "qwen3.8-max",
-  "messages": [
-    {
-      "role": "system",
-      "content": "你是一个智能音箱助手，回复非常简洁、口语化，适合直接念出来。请遵守以下规则：1.每次回复尽量控制在1-2句话内。2.除了逗号和句号，不要用其他标点符号。3.不要列举项目符号（如1、2、3）。4.直接回答问题，不要复述用户问题或说‘根据您的问题’。5.语气亲切自然，像朋友聊天一样"
-    }, 
-    {
-      "role": "user",
-      "content": "'"$user_message"'"
-    }
-  ]
-}'
+curl -sS --connect-timeout 15 --max-time 120 \
+    'https://api.deepseek.com/chat/completions' \
+    -H "Authorization: Bearer ${API_KEY}" \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/json' \
+    --data-raw "$payload" |
+    jq -c .
