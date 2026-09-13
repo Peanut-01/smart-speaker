@@ -635,4 +635,13 @@ void player_offline_mode()
 
     g_device_mode = OFFLINE_MODE;
     player_tts("已切换为离线模式");
+
+    // 读取U盘歌曲
+    if (link_read_music() == -1)
+    {
+        player_tts("切换离线模式失败");
+        return;
+    }
+
+    link_traverse_list();
 }

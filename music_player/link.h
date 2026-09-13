@@ -15,5 +15,6 @@ void link_traverse_list();
 int link_find_next(int mode, char *cur, char *next);
 void link_clear_list();
 void link_find_prior(const char *cur, char *music);
+int link_read_music();
 
 #endif // _LINK_H

@@ -1,9 +1,10 @@
-#include "link.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <json/json.h>
 #include <string.h>
+#include <dirent.h>
 #include "player.h"
+#include "link.h"
 
 
 Node *g_music_head = NULL;
@@ -167,4 +168,60 @@ void link_find_prior(const char *cur, char *music)
         }
         p = p->next;
     }
+}
+
+
+// 判断字符串中是否有空格
+int link_is_space(const char *name)
+{
+    const char *p = name;
+    while (*p != '\0')
+    {
+        if (*p == ' ')
+            return 1;
+        p++;
+    }
+    return 0;
+}
+
+
+// 读取U盘中的音乐文件，并把它们放到链表中
+int link_read_music()
+{
+    // 清空链表
+    link_clear_list();
+
+    DIR *dir;
+    struct dirent *file;
+    char name[128] = {0};
+    // 打开文件夹
+    dir = opendir("/mnt/usb");
+    if (NULL == dir)
+    {
+        perror("opendir");
+        return -1;
+    }
+
+    while ((file = readdir(dir)) != NULL)
+    {
+        if (file->d_type != DT_REG)  // 文件夹
+            continue;
+        if (!strstr(file->d_name, ".mp3"))  // 不是mp3文件
+            continue;
+        if (link_is_space(file->d_name))  // 歌曲名中有空格
+        {
+            name[0] = '"';
+            strcpy(name + 1, file->d_name);
+            name[strlen(name)] = '"';
+        }
+        else
+        {
+            strcpy(name, file->d_name);
+        }
+        // 插入链表
+        link_insert_elem(name);
+
+        memset(name, 0, sizeof(name));
+    }
+    return 0;
 }
