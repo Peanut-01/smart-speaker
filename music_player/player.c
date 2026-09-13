@@ -12,6 +12,8 @@
 #include <fcntl.h>
 #include <fcntl.h>
 #include <sys/sem.h>
+#include <sys/mount.h>
+#include <sys/stat.h>
 #include "player.h"
 #include "link.h"
 #include "socket.h"
@@ -593,4 +595,44 @@ void player_change_voice()
     usleep(100000);  // 等待tts进程结束
 
     player_tts("好的，后面我用这个声音跟你交流");
+}
+
+
+// 切换为离线模式
+void player_offline_mode()
+{
+    // 判断U盘有没有插上
+    char device_name[64] = "/dev/sda1";
+    if (access("/dev/sda1", F_OK) != 0)
+    {
+        strcpy(device_name, "/dev/sdb1");
+        if (access("/dev/sdb1", F_OK) != 0)
+        {
+            strcpy(device_name, "/dev/sdc1");
+            if (access("/dev/sdc1", F_OK) != 0)
+            {
+                player_tts("请先插上存储设备");
+                return;
+            }
+        }
+    }
+
+    // 挂载
+    if (access("/mnt/usb", F_OK) != 0)
+    {
+        if(mkdir("/mnt/usb", 0755) == -1)
+        {
+            player_tts("创建挂载点失败");
+            return;
+        }
+    }
+
+    if (mount(device_name, "/mnt/usb", "exfat", 0, NULL) != 0)
+    {
+        player_tts("挂载存储设备失败");
+        return;
+    }
+
+    g_device_mode = OFFLINE_MODE;
+    player_tts("已切换为离线模式");
 }

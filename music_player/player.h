@@ -62,6 +62,7 @@ void player_singer_play(const char *name);
 void player_tts(const char* msg);
 void player_stop_tts();
 void player_change_voice();
+void player_offline_mode();
         
 
 #endif // _PLAYER_H

@@ -275,6 +275,10 @@ void select_read_fifo()
     {
         player_change_voice();
     }
+    else if (strstr(buf, "离线模式"))
+    {
+        player_offline_mode();
+    }
     else    // 聊天（和AI聊天）
     {
         char cmd[1024] = {0};
