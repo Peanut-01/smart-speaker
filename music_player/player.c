@@ -534,6 +534,7 @@ void player_singer_play(const char *name)
 }
 
 
+// 语音合成
 void player_tts(const char* msg)
 {
     if (write(g_ttsfd, msg, strlen(msg)) == -1)
@@ -543,6 +544,7 @@ void player_tts(const char* msg)
 }
 
 
+// 结束语音合成
 void player_stop_tts()
 {
     // 获取tts进程号
@@ -563,4 +565,32 @@ void player_stop_tts()
 
     // 发送信号结束tts进程
     kill(tts_pid, SIGUSR1);
+}
+
+
+// 更换声音
+void player_change_voice()
+{
+    // 获取tts进程号
+    FILE *fp = popen("pgrep tts", "r");
+
+    if (NULL == fp)
+    {
+        perror("popen");
+        return;
+    }
+
+    char buf[32] = {0};
+    fgets(buf, sizeof(buf), fp);
+
+    pid_t tts_pid = atoi(buf);
+
+    pclose(fp);
+
+    // 发送信号结束tts进程
+    kill(tts_pid, SIGUSR2);
+
+    usleep(100000);  // 等待tts进程结束
+
+    player_tts("好的，后面我用这个声音跟你交流");
 }

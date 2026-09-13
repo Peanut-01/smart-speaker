@@ -11,6 +11,7 @@
 
 int running = 1;
 int tts_fd = 0;
+int speaker_id = 1;  // 默认使用第一个声音
 
 extern const SherpaOnnxOfflineTts *tts;
 extern snd_pcm_t *pcmp;
@@ -56,10 +57,23 @@ void stop_handler(int sig)
 }
 
 
+// 更换声音
+void change_handler(int sig)
+{
+    // 更换声音
+    speaker_id++;
+    if (speaker_id > 174)
+    {
+        speaker_id = 1;
+    }
+}
+
+
 int main()
 {
     signal(SIGINT, quit_handler);
     signal(SIGUSR1, stop_handler);  // 结束语音合成
+    signal(SIGUSR2, change_handler);  // 更换声音
 
     if (init_sherpa_tts() == -1)
     {
@@ -108,7 +122,7 @@ int main()
         snd_pcm_prepare(pcmp);  // PREPARED状态
         
         // tts实例 需要合成的文本 说话的声音 语速 用于播放的回调函数
-		SherpaOnnxOfflineTtsGenerateWithCallback(tts, buf, 1, 1.0, play_callback);
+		SherpaOnnxOfflineTtsGenerateWithCallback(tts, buf, speaker_id, 1.0, play_callback);
 
         // 等待缓冲区数据播放完成
         snd_pcm_drain(pcmp);    // SETUP状态

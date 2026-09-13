@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # 在这里填写自己的 DeepSeek API Key
-API_KEY='sk-0376c7efe52e496db086d15246bc8cce'
+API_KEY='sk-c79d4e59743e472792672294202aaebf'
 
 if [ "$#" -ne 1 ]; then
     echo "请传入一个问题参数" >&2

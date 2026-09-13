@@ -271,6 +271,10 @@ void select_read_fifo()
     {
         player_stop_play();
     }
+    else if (strstr(buf, "换") && strstr(buf, "声音"))
+    {
+        player_change_voice();
+    }
     else    // 聊天（和AI聊天）
     {
         char cmd[1024] = {0};
