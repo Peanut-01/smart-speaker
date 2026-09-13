@@ -535,3 +535,16 @@ void socket_upload_music()
     json_object_put(arr);
     json_object_put(obj);
 }
+
+
+// 断开网络连接
+void socket_disconnect()
+{
+    // 取消线程
+    pthread_cancel(tid);
+    
+    // 把 g_sockfd 从集合中移除
+    FD_CLR(g_sockfd, &READSET);
+    g_maxfd = (g_maxfd == g_sockfd) ? (g_maxfd - 1) : g_maxfd;
+    close(g_sockfd);
+}

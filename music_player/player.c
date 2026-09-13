@@ -206,15 +206,23 @@ void child_process(char *name)
             {
                 if (link_find_next(s.cur_mode, s.cur_music, name) == -1)    // 播放完了所有歌曲
                 {
-                    /*** 给父子进程发送信号，
-                     * 父进程收到信号：请求新的歌曲并更新
-                     * 子进程收到信号，修改标志位
-                     * */ 
-                    kill(s.parent_pid, SIGUSR1);
-                    kill(s.child_pid, SIGUSR1);
+                    if (g_device_mode == OFFLINE_MODE)
+                    {
+                        strcpy(name, g_music_head->next->music_name);  // 播放第一首歌
+                    }
 
-                    usleep(100000);
-                    exit(0);
+                    else if (g_device_mode == ONLINE_MODE)
+                    {
+                        /*** 给父子进程发送信号，
+                         * 父进程收到信号：请求新的歌曲并更新
+                         * 子进程收到信号，修改标志位
+                         * */ 
+                        kill(s.parent_pid, SIGUSR1);
+                        kill(s.child_pid, SIGUSR1);
+
+                        usleep(100000);
+                        exit(0);
+                    }
                 }
             }
 
@@ -230,6 +238,11 @@ void child_process(char *name)
                 strncpy(s.cur_singer, name, p - name);
                 strcpy(s.cur_music, p + 1);
             }
+            else if (g_device_mode == OFFLINE_MODE)
+            {
+                strcpy(s.cur_music, name);
+            }
+
             player_sem_p();
             parent_set_shm(&s);
             player_sem_v();
@@ -238,6 +251,8 @@ void child_process(char *name)
 
             if (g_device_mode == ONLINE_MODE)
                 strcpy(music_path, ONLINE_URL);
+            else if (g_device_mode == OFFLINE_MODE)
+                strcpy(music_path, OFFLINE_URL);
 
             strcat(music_path, name);
 
@@ -365,7 +380,11 @@ void player_next_play()
 
             return;
         }
-
+        else if (g_device_mode == OFFLINE_MODE)
+        {
+            // 播放第一首歌
+            strcpy(music, g_music_head->next->music_name);
+        }
     }
 
     // 更新共享内存
@@ -377,7 +396,12 @@ void player_next_play()
 
         strncpy(s.cur_singer, music, p - music);
         strcpy(s.cur_music, p + 1);
+    } 
+    else if (g_device_mode == OFFLINE_MODE)
+    {
+        strcpy(s.cur_music, music);
     }
+    
     player_sem_p();
     parent_set_shm(&s);
     player_sem_v();
@@ -385,11 +409,15 @@ void player_next_play()
     // 写管道播放新的歌曲
     char music_path[128] = {0};
     char cmd[258] = {0};
-    strcpy(music_path, ONLINE_URL);
+    if (g_device_mode == ONLINE_MODE)
+        strcpy(music_path, ONLINE_URL);
+    else if (g_device_mode == OFFLINE_MODE)
+        strcpy(music_path, OFFLINE_URL);
+    
     strcat(music_path, music);
 
     // 让孙进程的mplayer立即切换歌曲
-    sprintf(cmd, "loadfile %s\n", music_path);
+    sprintf(cmd, "loadfile \"%s\"\n", music_path);
     write_fifo(cmd);
 
     //更改标志位
@@ -422,6 +450,11 @@ void player_prior_play()
         strncpy(s.cur_singer, music, p - music);
         strcpy(s.cur_music, p + 1);
     }
+    else if (g_device_mode == OFFLINE_MODE)
+    {
+        strcpy(s.cur_music, music);
+    }
+
     player_sem_p();
     parent_set_shm(&s);
     player_sem_v();
@@ -429,11 +462,16 @@ void player_prior_play()
     // 写管道播放新的歌曲
     char music_path[128] = {0};
     char cmd[258] = {0};
-    strcpy(music_path, ONLINE_URL);
+
+    if (g_device_mode == ONLINE_MODE)
+        strcpy(music_path, ONLINE_URL);
+    else if (g_device_mode == OFFLINE_MODE)
+        strcpy(music_path, OFFLINE_URL);
+    
     strcat(music_path, music);
 
     // 让孙进程的mplayer立即切换歌曲
-    sprintf(cmd, "loadfile %s\n", music_path);
+    sprintf(cmd, "loadfile \"%s\"\n", music_path);
     write_fifo(cmd);
 
     //更改标志位
@@ -617,24 +655,23 @@ void player_offline_mode()
         }
     }
 
-    // 挂载
+    // 先判断挂载点是否存在，如果不存在就创建
     if (access("/mnt/usb", F_OK) != 0)
     {
-        if(mkdir("/mnt/usb", 0755) == -1)
+        if (mkdir("/mnt/usb", 0755) == -1)
         {
             player_tts("创建挂载点失败");
             return;
         }
     }
 
+    umount("/mnt/usb");  // 卸载挂载点
+
     if (mount(device_name, "/mnt/usb", "exfat", 0, NULL) != 0)
     {
         player_tts("挂载存储设备失败");
         return;
     }
-
-    g_device_mode = OFFLINE_MODE;
-    player_tts("已切换为离线模式");
 
     // 读取U盘歌曲
     if (link_read_music() == -1)
@@ -643,5 +680,14 @@ void player_offline_mode()
         return;
     }
 
-    link_traverse_list();
+    // link_traverse_list();
+
+    // 断开网络连接
+    socket_disconnect();
+
+    g_start_flag = 0;
+    g_suspend_flag = 0;
+    g_device_mode = OFFLINE_MODE;
+
+    player_tts("已切换为离线模式");
 }

@@ -17,6 +17,7 @@
 #define OFFLINE_MODE 2
 
 #define ONLINE_URL "http://180.76.142.171/music/"
+#define OFFLINE_URL "/mnt/usb/"
 
 typedef struct Shm
 {

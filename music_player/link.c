@@ -193,7 +193,7 @@ int link_read_music()
 
     DIR *dir;
     struct dirent *file;
-    char name[128] = {0};
+    //char name[128] = {0};
     // 打开文件夹
     dir = opendir("/mnt/usb");
     if (NULL == dir)
@@ -208,20 +208,21 @@ int link_read_music()
             continue;
         if (!strstr(file->d_name, ".mp3"))  // 不是mp3文件
             continue;
-        if (link_is_space(file->d_name))  // 歌曲名中有空格
-        {
-            name[0] = '"';
-            strcpy(name + 1, file->d_name);
-            name[strlen(name)] = '"';
-        }
-        else
-        {
-            strcpy(name, file->d_name);
-        }
-        // 插入链表
-        link_insert_elem(name);
+        // if (link_is_space(file->d_name))  // 歌曲名中有空格
+        // {
+        //     name[0] = '"';
+        //     strcpy(name + 1, file->d_name);
+        //     name[strlen(name)] = '"';
+        // }
+        // else
+        // {
+        //     strcpy(name, file->d_name);
+        // }
 
-        memset(name, 0, sizeof(name));
+        // 插入链表
+        link_insert_elem(file->d_name);
+
+        //memset(name, 0, sizeof(name));
     }
     return 0;
 }
