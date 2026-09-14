@@ -17,6 +17,7 @@ enum Appstate
 int running = 1; // 控制主循环的运行状态
 enum Appstate cur_state = STATE_KWS; // 当前应用状态，初始为唤醒词识别
 int asr_fd; // 用于与ASR进程通信的文件描述符
+enum DeviceMode device_mode = ONLINE_MODE; // 设备模式，默认为在线模式
 
 extern snd_pcm_t *pcmp; // ALSA PCM设备句柄
 extern snd_pcm_uframes_t frams_per_buffer; // ALSA缓冲区帧数
@@ -54,10 +55,17 @@ void clean_up()
 }
 
 
+void offline_handler(int sig)
+{
+    device_mode = OFFLINE_MODE;
+}
+
+
 int main()
 {
     // 信号处理函数
     signal(SIGINT, quit_handler);
+    signal(SIGUSR1, offline_handler);
 
     // 初始化
     if (init_alsa() == -1)
@@ -152,7 +160,7 @@ int main()
             float_buffer[i] = resample_buffer[i] / 32768.0f;
         }   
 
-        if (cur_state == STATE_ASR)
+        if (cur_state == STATE_ASR && device_mode == ONLINE_MODE)
         {
             if (sherpa_asr(float_buffer, resample_frames))
             {
@@ -165,13 +173,15 @@ int main()
         {
             if (sherpa_kws(float_buffer, resample_frames))
             {
-                cur_state = STATE_ASR;
-                printf("\n=======语音识别模式========\n");
-                printf("请说话...\n");
-
-                sleep(2);
-                snd_pcm_drop(pcmp);  // 清空缓冲区 变成SETUP状态
-                snd_pcm_prepare(pcmp);
+                if (device_mode == ONLINE_MODE)
+                {
+                    cur_state = STATE_ASR;
+                    printf("\n=======语音识别模式========\n");
+                    printf("请说话...\n");
+                    sleep(2);
+                    snd_pcm_drop(pcmp);  // 清空缓冲区 变成SETUP状态
+                    snd_pcm_prepare(pcmp);
+                }
             }
         }
 

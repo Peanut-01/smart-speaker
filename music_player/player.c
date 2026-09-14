@@ -636,6 +636,30 @@ void player_change_voice()
 }
 
 
+// 通知asr切换模式
+void player_switch_asr_mode()
+{
+    // 获取asr进程号
+    FILE *fp = popen("pgrep asr", "r");
+
+    if (NULL == fp)
+    {
+        perror("popen");
+        return;
+    }
+
+    char buf[32] = {0};
+    fgets(buf, sizeof(buf), fp);
+
+    pid_t asr_pid = atoi(buf);
+
+    pclose(fp);
+
+    // 发送信号切换asr模式
+    kill(asr_pid, SIGUSR1);
+}
+
+
 // 切换为离线模式
 void player_offline_mode()
 {
@@ -680,10 +704,13 @@ void player_offline_mode()
         return;
     }
 
-    // link_traverse_list();
+    link_traverse_list();
 
     // 断开网络连接
     socket_disconnect();
+
+    // 通知asr进程
+    player_switch_asr_mode();
 
     g_start_flag = 0;
     g_suspend_flag = 0;
