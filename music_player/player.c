@@ -310,6 +310,9 @@ int write_fifo(const char *cmd)
 // 结束播放
 void player_stop_play() 
 {
+    if (g_start_flag == 0)
+        return;
+    
     // 通知子进程结束
     Shm s;
     parent_get_shm(&s);
@@ -661,7 +664,7 @@ void player_switch_asr_mode()
 
 
 // 切换为离线模式
-void player_offline_mode()
+int player_offline_mode()
 {
     // 判断U盘有没有插上
     char device_name[64] = "/dev/sda1";
@@ -674,7 +677,7 @@ void player_offline_mode()
             if (access("/dev/sdc1", F_OK) != 0)
             {
                 player_tts("请先插上存储设备");
-                return;
+                return -1;
             }
         }
     }
@@ -685,7 +688,7 @@ void player_offline_mode()
         if (mkdir("/mnt/usb", 0755) == -1)
         {
             player_tts("创建挂载点失败");
-            return;
+            return -1;
         }
     }
 
@@ -694,14 +697,14 @@ void player_offline_mode()
     if (mount(device_name, "/mnt/usb", "exfat", 0, NULL) != 0)
     {
         player_tts("挂载存储设备失败");
-        return;
+        return -1;
     }
 
     // 读取U盘歌曲
     if (link_read_music() == -1)
     {
         player_tts("切换离线模式失败");
-        return;
+        return -1;
     }
 
     link_traverse_list();
@@ -709,12 +712,17 @@ void player_offline_mode()
     // 断开网络连接
     socket_disconnect();
 
-    // 通知asr进程
+    // 通知 asr 进程
     player_switch_asr_mode();
+
+    // 回收播放进程
+    player_stop_play();
 
     g_start_flag = 0;
     g_suspend_flag = 0;
     g_device_mode = OFFLINE_MODE;
 
     player_tts("已切换为离线模式");
+
+    return 0;
 }

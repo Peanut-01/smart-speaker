@@ -292,6 +292,7 @@ void select_read_fifo()
 }
 
 
+// 持续监听fd_set集合，处理可读事件
 void m_select()
 {
     fd_set TMPSET;

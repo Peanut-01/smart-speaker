@@ -1,9 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
 #include "select.h"
 #include "link.h"
 #include "player.h"
-#include <stdlib.h>
-#include <signal.h>
 #include "socket.h"
 #include "device.h"
 #include "main.h"
@@ -26,6 +26,7 @@ int main()
         return -1;
     }
     printf("集合初始化成功\n");
+
     // 初始化链表
     if (init_link() == -1)
     {
@@ -53,13 +54,13 @@ int main()
     // 初始化音量
     device_set_volume(DEF_VOLUME);
 
-    // 初始化网络
-    if (init_socket() == -1)
+    // 初始化管道
+    if (-1 == init_fifo())
     {
-        printf("网络初始化失败\n");
+        perror("初始化管道失败");
         return -1;
     }
-    printf("网络初始化成功\n");
+    printf("管道初始化成功\n");
 
     // 初始化按键
     if (init_button() == -1)
@@ -72,19 +73,24 @@ int main()
         printf("按键初始化成功\n");
     }
 
+    // 初始化网络
+    if (init_socket() == -1)
+    {
+        printf("网络初始化失败\n");
+        // 进入离线模式
+        if (player_offline_mode() == -1)
+        {
+            printf("进入离线模式失败\n");
+            return -1;
+        }
+        m_select();
+    }
+    printf("网络初始化成功\n");
+
     // 获取音乐文件（歌手 / 名字）
     socket_get_music("其他");
 
-    //link_traverse_list();
-    
-
-    // 初始化管道
-    if (-1 == init_fifo())
-    {
-        perror("初始化管道失败");
-        return -1;
-    }
-    printf("管道初始化成功\n");
+    // link_traverse_list();
 
     // 循环监听
     m_select();
