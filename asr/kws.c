@@ -76,6 +76,7 @@ int sherpa_kws(float *float_buffer, int resample_frams)
 				{
 					perror("write fifo");
 				}
+
 				ret = 1;
 			}
 			else if (device_mode == OFFLINE_MODE && strcmp(r->keyword, "你好小胖")) 
@@ -88,10 +89,9 @@ int sherpa_kws(float *float_buffer, int resample_frams)
 
 				ret = 1;
 			}
-
+			
 			SherpaOnnxResetKeywordStream(kws_recognizer, kws_stream);
 
-            ret = 1; // 设置 ret 为 1，表示唤醒词识别成功
 		}
 		SherpaOnnxDestroyKeywordResult(r);
 	}

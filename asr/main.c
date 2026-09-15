@@ -178,7 +178,7 @@ int main()
                     cur_state = STATE_ASR;
                     printf("\n=======语音识别模式========\n");
                     printf("请说话...\n");
-                    sleep(2);
+                    usleep(1200000); // 等待1.2秒，确保声音输出不被麦克风自己识别
                     snd_pcm_drop(pcmp);  // 清空缓冲区 变成SETUP状态
                     snd_pcm_prepare(pcmp);
                 }
