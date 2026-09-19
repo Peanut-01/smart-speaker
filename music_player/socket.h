@@ -1,8 +1,8 @@
 #if !defined(_SOCKET_H)
 #define _SOCKET_H
 
-#define PORT 8008
-#define IP "127.0.0.1"
+#define PORT 8000
+#define IP "218.244.143.170"
 
 int init_socket();
 void socket_recv_data(char *msg);
