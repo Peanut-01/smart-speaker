@@ -1,9 +1,9 @@
 Target = main
-Object = main.o server.o
+Object = main.o server.o database.o
 CXX = g++
 
 $(Target): $(Object)
-	$(CXX) -o $(Target) $(Object) -levent
+	$(CXX) -o $(Target) $(Object) -levent -lmysqlclient -ljsoncpp
 
 
 clean:
