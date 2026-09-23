@@ -11,7 +11,10 @@
 #include <stdlib.h>
 #include <list>
 #include <time.h>
+#include <stdio.h>
 #include <jsoncpp/json/json.h>
+#include <sys/types.h>
+#include <dirent.h>
 #include "database.h"
 
 #define IP "172.28.208.58"
@@ -46,6 +49,9 @@ public:
 
     void server_read_data(struct bufferevent* bev, char* msg);
     void listen(const char* ip, int port);
+    void server_get_music(struct bufferevent* bev, std::string singer);
+    void server_send_data(struct bufferevent* bev, Json::Value &value);
+
     static void listener_cb(struct evconnlistener *, evutil_socket_t , struct sockaddr * , int socklen, void* );
     static void read_cb(struct bufferevent* bev, void* arg);
     static void event_cb(struct bufferevent* bev, short events, void* arg);

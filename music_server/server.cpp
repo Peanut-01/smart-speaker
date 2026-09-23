@@ -94,7 +94,10 @@ void Server::read_cb(struct bufferevent* bev, void* ctx) {
         return;
     }
 
-    std::cout << value << std::endl;
+    if (value["cmd"] == "get_music_list")   // 获取音乐数据
+    {
+        s->server_get_music(bev, value["singer"].asCString());
+    }
 }
 
 
@@ -136,3 +139,72 @@ void Server::event_cb(struct bufferevent* bev, short events, void* arg) {
 struct event_base* Server::server_get_base() {
     return m_base;
 }
+
+
+// 获取音乐数据
+void Server::server_get_music(struct bufferevent* bev, std::string singer)
+{
+    Json::Value val;
+    Json::Value arr;
+    std::list<std::string> music_list;
+    char path[128] = {0};
+
+    sprintf(path, "/var/www/html/music/%s", singer.c_str());
+
+    DIR* dir = opendir(path);
+    if (NULL == dir) 
+    {
+        perror("opendir");
+        return;
+    }
+
+    struct dirent* d;
+    while ((d = readdir(dir)) != NULL) 
+    {
+        if (d->d_type != DT_REG) 
+            continue;
+        if (!strstr(d->d_name, ".mp3"))
+            continue;
+
+        std::string name = singer + "/" + d->d_name;
+        music_list.push_back(name);
+    }
+
+    // 随机选取五首歌
+    auto it = music_list.begin();
+    srand(time(NULL));
+    int count = rand() % (music_list.size() - 4);
+    for (int i = 0; i < count; i++)
+    {
+        it++;
+    }
+
+    for (int i = 0; i < 5 && it != music_list.end(); i++, it++)
+    {
+        arr.append(*it);
+    }
+
+    val["cmd"] = "reply_music";
+    val["music"] = arr;
+
+    server_send_data(bev, val);
+
+    closedir(dir);
+}
+
+
+void Server::server_send_data(struct bufferevent* bev, Json::Value &value)
+{
+    char msg[1024] = {0};
+    std::string SendStr = Json::FastWriter().write(value);
+    int len = SendStr.length();
+    memcpy(msg, &len, sizeof(int));
+    memcpy(msg + sizeof(int), SendStr.c_str(), len);
+
+    if (bufferevent_write(bev, msg, len + sizeof(int)) == -1) 
+    {
+        std::cout << "Failed to send data" << std::endl;
+        return;
+    }
+}
+

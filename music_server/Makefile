@@ -2,8 +2,10 @@ Target = main
 Object = main.o server.o database.o
 CXX = g++
 
+CXXFLAGS = -levent -lmysqlclient -ljsoncpp -std=c++11
+
 $(Target): $(Object)
-	$(CXX) -o $(Target) $(Object) -levent -lmysqlclient -ljsoncpp
+	$(CXX) -o $(Target) $(Object) $(CXXFLAGS)
 
 
 clean:
