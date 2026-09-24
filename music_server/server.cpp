@@ -13,18 +13,16 @@ Server::Server() {
         exit(1);
     }
 
-    // 初始化链表对象
-    m_info = new std::list<PlayerInfo>;
+    // 创建player对象
+    m_player = new Player();
 }
 
 
 Server::~Server() {
-    if (m_database) {
+    if (m_database)
         delete m_database;
-    }
-    if (m_info) {
-        delete m_info;
-    }
+    if (m_player)
+        delete m_player;
 }
 
 
@@ -44,8 +42,8 @@ void Server::listen(const char* ip, int port) {
         return;
     }
 
-    // 监听集合，一般是死循环
-    event_base_dispatch(m_base);
+    // 启动定时器并监听
+    server_start_timer();
 
     // 释放对象
     evconnlistener_free(listener);
@@ -98,6 +96,10 @@ void Server::read_cb(struct bufferevent* bev, void* ctx) {
     {
         s->server_get_music(bev, value["singer"].asCString());
     }
+    else
+    {
+        s->server_player_handler(bev, value);
+    }
 }
 
 
@@ -136,7 +138,8 @@ void Server::event_cb(struct bufferevent* bev, short events, void* arg) {
 
 
 // 获取事件集合
-struct event_base* Server::server_get_base() {
+struct event_base* Server::server_get_base() 
+{
     return m_base;
 }
 
@@ -193,6 +196,7 @@ void Server::server_get_music(struct bufferevent* bev, std::string singer)
 }
 
 
+// 发送数据给客户端
 void Server::server_send_data(struct bufferevent* bev, Json::Value &value)
 {
     char msg[1024] = {0};
@@ -208,3 +212,45 @@ void Server::server_send_data(struct bufferevent* bev, Json::Value &value)
     }
 }
 
+
+// 处理音箱相关的命令
+void Server::server_player_handler(struct bufferevent* bev, Json::Value &value)
+{
+    if (value["cmd"] == "info")   // 获取音乐数据
+    {
+        m_player->player_update_list(bev, value, this);
+    }
+    else if (value["cmd"] == "app_info")   // APP上报数据
+    {
+        m_player->player_app_update_list(bev, value);
+    }
+}
+
+
+
+void Server::server_start_timer()
+{
+    struct event timer_event;   // 定时器时间
+    struct timeval tv;
+
+    if (event_assign(&timer_event, m_base, -1, EV_PERSIST, timeout_cb, m_player) == -1) 
+    {
+        std::cout << "Failed to assign timer event" << std::endl;
+        return;
+    }
+
+    evutil_timerclear(&tv);
+    tv.tv_sec = 2;  // 设置定时器间隔为2秒
+    tv.tv_usec = 0;
+    event_add(&timer_event, &tv);
+    event_base_dispatch(m_base);    // 死循环
+}
+
+
+// 定时器回调函数
+void  Server::timeout_cb(evutil_socket_t fd, short event, void *arg)
+{
+    Player* player = (Player*)arg;
+
+    player->player_traverse_list();
+}
